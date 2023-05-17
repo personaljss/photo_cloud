@@ -1,10 +1,17 @@
 package models;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import services.Logger;
 
 public abstract class User implements Serializable{
     /**
@@ -20,17 +27,9 @@ public abstract class User implements Serializable{
     private String emailAddress;
     private String profilePhotoPath = "default.jpg"; // default profile photo
     private List<Photo> album;
-    //If this object is dirty, it means that it needs to be deserialize
-    private transient boolean isDirty=false;
-   
-    
-    public boolean isDirty() {
-		return isDirty;
-	}
 
-	public void setDirty(boolean isDirty) {
-		this.isDirty = isDirty;
-	}
+
+
 
 	// methods for getting and setting these attributes
     public User(String nickname, String password, String realName, String surname, String age, String emailAddress) {
@@ -124,7 +123,39 @@ public abstract class User implements Serializable{
 
         return user;
     }
+    
+	protected void save() {
+		try {
+			FileOutputStream fos = new FileOutputStream(getDataFile());
+			try {
+				ObjectOutputStream oos = new ObjectOutputStream(fos);
+				oos.writeObject(this);
+				oos.close();
+				fos.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Logger.logError(e.getMessage());
+			}
 
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Logger.logError(e.getMessage());
+		}
+
+		// ObjectOutputStream oos=new ObjectOutputStream()
+	}
+
+	
+	public File getDataFile() {
+		return new File("data/" + getNickname() + "/user.txt");
+	}
+
+    
+	public void addPhoto(Photo photo) {
+    	album.add(photo);
+    }
 
 
     public List<Photo> getAlbum() {
@@ -133,10 +164,12 @@ public abstract class User implements Serializable{
 
 	public void setAlbum(List<Photo> album) {
 		this.album = album;
+		save();
 	}
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+		save();
 	}
 
 	public String getNickname() {
@@ -145,26 +178,32 @@ public abstract class User implements Serializable{
 
     public void setPassword(String password) {
         this.password = password;
+		save();
     }
 
     public void setRealName(String realName) {
         this.realName = realName;
+		save();
     }
 
     public void setSurname(String surname) {
         this.surname = surname;
+		save();
     }
 
     public void setAge(String age) {
         this.age = age;
+		save();
     }
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
+		save();
     }
 
     public void setProfilePhotoPath(String profilePhotoPath) {
         this.profilePhotoPath = profilePhotoPath;
+		save();
     }
 
     public String getPassword() {

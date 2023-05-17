@@ -2,6 +2,7 @@ package services;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDate;
 
 public class Logger {
 	//Paths of the files to be logged
@@ -11,8 +12,9 @@ public class Logger {
 
 	
 	public static void logError(String error) {
+		
 		try (PrintWriter out = new PrintWriter(errorPath)) {
-            out.println(error);
+            out.println(LocalDate.now()+error);
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file.");
             e.printStackTrace();

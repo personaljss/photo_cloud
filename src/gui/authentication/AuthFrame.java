@@ -12,7 +12,7 @@ public class AuthFrame extends JFrame {
 
     public AuthFrame() {
         setTitle("Login");
-
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         signupForm = new SignupForm(this); // Temporarily pass this
         loginForm = new LoginForm(this);
         //signupForm.setLoginForm(loginForm); // Set the loginForm after it's initialized

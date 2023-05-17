@@ -94,7 +94,14 @@ public class Authentication {
 	            if (!folderCreated) {
 	                throw new IOException("Could not create user folder.");
 	            }
-
+	       
+	            // Create images folder inside user folder
+	            File imagesFolder = new File(userFolder, "images");
+	            folderCreated = imagesFolder.mkdir();
+	            if (!folderCreated) {
+	                throw new IOException("Could not create images folder.");
+	            }
+	            
 	            // Create the User object
 	            User user = User.create(nickName, password, realName, surname, age, emailAddress, type);
 
