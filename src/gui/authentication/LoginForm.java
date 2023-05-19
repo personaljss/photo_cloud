@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -13,7 +14,8 @@ import javax.swing.JTextField;
 
 import auth.AuthResult;
 import auth.Authentication;
-import gui.home.HomeFrame;
+import gui.home.MainFrame;
+import gui.profile.ProfilePage;
 
 public class LoginForm extends JPanel {
 	/**
@@ -72,8 +74,20 @@ public class LoginForm extends JPanel {
 		});
 	}
 	
+	/*
 	private void goToHomeFrame() {
-		new HomeFrame();
+		//new HomeFrame();
+		new MainFrame();
 		authFrame.dispose();
 	}
+	*/
+	
+	private void goToHomeFrame() {
+	    ProfilePage profilePage = new ProfilePage(Authentication.getInstance().getCurrentUser());
+	    //mainFrame.getContentPane().add(profilePage);
+
+	    
+	    authFrame.dispose();
+	}
+
 }

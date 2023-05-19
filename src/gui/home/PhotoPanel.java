@@ -1,31 +1,50 @@
 package gui.home;
 
-import services.ImageMatrix;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.awt.event.*;
-import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import models.Photo;
+import services.ImageMatrix;
 
 public class PhotoPanel extends JPanel {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1305911466389510173L;
+    private Photo photo;
     private BufferedImage originalImage;
     private ImageMatrix imageMatrix;
     private JLabel photoLabel;
     private JPanel infoPanel;
 
-    public PhotoPanel() throws IOException {
+    private static final int STANDARD_WIDTH = 300;
+    private static final int STANDARD_HEIGHT = 200;
+
+    public PhotoPanel(Photo photo) throws IOException {
+        this.photo = photo;
         setLayout(new BorderLayout());
 
-        // Assuming you have a default image path
-        String imagePath = "resources/likeIcon.png";
-        originalImage = ImageIO.read(new File(imagePath));
-        imageMatrix = new ImageMatrix(originalImage);
+        // Assuming you have a default image path+
+        originalImage = ImageIO.read(photo.getImageFile());
+        BufferedImage resizedImage = resizeImage(originalImage, STANDARD_WIDTH, STANDARD_HEIGHT);
+        imageMatrix = new ImageMatrix(resizedImage);
 
         // Prepare photo label
-        photoLabel = new JLabel(new ImageIcon(originalImage), SwingConstants.CENTER);
+        photoLabel = new JLabel(new ImageIcon(resizedImage), SwingConstants.CENTER);
         add(photoLabel, BorderLayout.CENTER);
 
         // Create info panel
@@ -70,23 +89,19 @@ public class PhotoPanel extends JPanel {
             @Override
             public void mouseExited(MouseEvent e) {
                 // Revert to original image
-                photoLabel.setIcon(new ImageIcon(originalImage));
+                photoLabel.setIcon(new ImageIcon(resizedImage));
 
                 // Hide info panel
                 infoPanel.setVisible(false);
             }
         });
     }
+
     private BufferedImage blurImage() {
         // Use a 5x5 Gaussian blur kernel for more blur
-        int[][] kernel = {
-                {1, 4, 6, 4, 1},
-                {4, 16, 24, 16, 4},
-                {6, 24, 36, 24, 6},
-                {4, 16, 24, 16, 4},
-                {1, 4, 6, 4, 1}
-        };
-        int kernelSum = 256;  // Sum of all elements in the kernel
+        int[][] kernel = { { 1, 4, 6, 4, 1 }, { 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 },
+                { 1, 4, 6, 4, 1 } };
+        int kernelSum = 256; // Sum of all elements in the kernel
 
         ImageMatrix blurredMatrix = new ImageMatrix(imageMatrix.getWidth(), imageMatrix.getHeight());
 
@@ -112,5 +127,14 @@ public class PhotoPanel extends JPanel {
         }
 
         return blurredMatrix.getBufferedImage();
+    }
+
+    private BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
+        Image resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = bufferedImage.createGraphics();
+        graphics.drawImage(resizedImage, 0, 0, null);
+        graphics.dispose();
+        return bufferedImage;
     }
 }
