@@ -2,23 +2,23 @@ package models;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import services.Logger;
 
 public abstract class User implements Serializable{
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1054930822071093069L;
-	
+    private static final String DATA_DIR = "data/";
+    //private static final String IMAGES_DIR = "/images";
+    private static final String USER_DATA_FILE = "/user.txt";
+    
 	private String nickname;
     private String password;
     private String realName;
@@ -28,10 +28,6 @@ public abstract class User implements Serializable{
     private String profilePhotoPath = "default.jpg"; // default profile photo
     private List<Photo> album;
 
-
-
-
-	// methods for getting and setting these attributes
     public User(String nickname, String password, String realName, String surname, String age, String emailAddress) {
         this.nickname = nickname;
         this.password = password;
@@ -42,63 +38,47 @@ public abstract class User implements Serializable{
         album=new ArrayList<>();
     }
     
-    public static User create(Map<String, String> map) {
-        User user = null;
-        // The type should be stored in the map
-        String type = map.get("type");
-
-        switch (type) {
-            case "FreeUser":
-                user = new FreeUser(
-                    map.get("nickname"),
-                    map.get("password"),
-                    map.get("realName"),
-                    map.get("surname"),
-                    map.get("age"),
-                    map.get("emailAddress"));
-                break;
-            case "HobbyistUser":
-                user = new HobbyistUser(
-                        map.get("nickname"),
-                        map.get("password"),
-                        map.get("realName"),
-                        map.get("surname"),
-                        map.get("age"),
-                        map.get("emailAddress"));
-                break;
-            case "ProfessionalUser":
-                user = new ProfessionalUser(
-                    map.get("nickname"),
-                    map.get("password"),
-                    map.get("realName"),
-                    map.get("surname"),
-                    map.get("age"),
-                    map.get("emailAddress"));
-                break;
-            case "Administrator":
-                user = new Administrator(
-                    map.get("nickname"),
-                    map.get("password"),
-                    map.get("realName"),
-                    map.get("surname"),
-                    map.get("age"),
-                    map.get("emailAddress"));
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid user type: " + type);
-        }
-        // Set other fields for the user
-        user.setProfilePhotoPath(map.get("profilePhotoPath"));
-        
-        // TODO: Set the album, you might need to implement a method to convert from String to List<Photo>
-        // user.setAlbum(map.get("album"));
-
-        return user;
+    /**
+     * Checks if a User with the given nickname already exists.
+     * @param nickname - the nickname of the user to check
+     * @return true if a user with the nickname exists, false otherwise
+     */
+    public static boolean exists(String nickname) {
+        File userFolder = new File(DATA_DIR + nickname);
+        return userFolder.exists();
     }
-    
-    public static User create(String nickname, String password, String realName, String surname, String age, String emailAddress, String type) {
+
+    /**
+     * Creates a new User with the given details and writes the new User to disk.
+     * @param nickname - the user's nickname
+     * @param password - the user's password
+     * @param realName - the user's real name
+     * @param surname - the user's surname
+     * @param age - the user's age
+     * @param emailAddress - the user's email address
+     * @param type - the type of user to create
+     * @return the newly created User
+     * @throws IOException if there was an error writing the new User to disk
+     */
+    public static User create(String nickname, String password, String realName, String surname, String age, String emailAddress, String type) throws IOException {
         User user = null;
-        
+        // Check if user already exists
+        if (exists(nickname)) {
+            throw new IOException("User already exists. Please log in.");
+        }
+        File userFolder = new File("data/" + nickname);
+        // Create user folder
+        boolean folderCreated = userFolder.mkdir();
+        if (!folderCreated) {
+            throw new IOException("Could not create user folder.");
+        }
+        // Create images folder inside user folder
+        File imagesFolder = new File(userFolder, "images");
+        folderCreated = imagesFolder.mkdir();
+        if (!folderCreated) {
+            throw new IOException("Could not create images folder.");
+        }
+        // Continue with user creation based on type
         switch (type) {
             case "FreeUser":
                 user = new FreeUser(nickname, password, realName, surname, age, emailAddress);
@@ -115,46 +95,40 @@ public abstract class User implements Serializable{
             default:
                 throw new IllegalArgumentException("Invalid user type: " + type);
         }
-
         // Set other fields for the user
-        // Here you might want to set a default profile photo path and an empty album
-        user.setProfilePhotoPath("default.jpg");
         user.setAlbum(new ArrayList<>());
-
+        // Serialize the User object
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(user.getDataFile()))) {
+            oos.writeObject(user);
+        } catch (IOException e) {
+            throw new IOException("Could not write user data.");
+        }
         return user;
     }
-    
-	protected void save() {
-		try {
-			FileOutputStream fos = new FileOutputStream(getDataFile());
-			try {
-				ObjectOutputStream oos = new ObjectOutputStream(fos);
-				oos.writeObject(this);
-				oos.close();
-				fos.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Logger.logError(e.getMessage());
-			}
 
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			Logger.logError(e.getMessage());
-		}
+    protected void save() throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(getDataFile());
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(this);
+        } 
+    }
 
-		// ObjectOutputStream oos=new ObjectOutputStream()
-	}
-
-	
-	public File getDataFile() {
-		return new File("data/" + getNickname() + "/user.txt");
-	}
-
+    /**
+     * Returns the File that represents this User's data on disk.
+     * @return the User's data File
+     */
+    public File getDataFile() {
+        return new File(DATA_DIR + getNickname() + USER_DATA_FILE);
+    }
     
 	public void addPhoto(Photo photo) {
+		List<Photo> oldAlbum=this.album;
     	album.add(photo);
+    	try {
+    		save();
+    	}catch(Exception e) {
+    		this.album=oldAlbum;
+    	}
     }
 
 
@@ -163,47 +137,93 @@ public abstract class User implements Serializable{
 	}
 
 	public void setAlbum(List<Photo> album) {
+		List<Photo> oldAlbum=this.album;
 		this.album = album;
-		save();
+		try {
+			save();
+		}catch(Exception e) {
+			this.album=oldAlbum;
+		}
 	}
 
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
-		save();
-	}
-
+    public void setNickname(String nickname) throws IOException {
+        String oldNickname = this.nickname;
+        this.nickname = nickname;
+        try {
+            save();
+        } catch (IOException e) {
+            this.nickname = oldNickname;
+            throw e;
+        }
+    }
+    
 	public String getNickname() {
         return nickname;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(String password) throws IOException {
+        String oldPassword = this.password;
         this.password = password;
-		save();
+        try {
+            save();
+        } catch (IOException e) {
+            this.password = oldPassword;
+            throw e;
+        }
     }
 
-    public void setRealName(String realName) {
+    public void setRealName(String realName) throws IOException {
+        String oldRealName = this.realName;
         this.realName = realName;
-		save();
+        try {
+            save();
+        } catch (IOException e) {
+            this.realName = oldRealName;
+            throw e;
+        }
     }
 
-    public void setSurname(String surname) {
+    public void setSurname(String surname) throws IOException {
+        String oldSurname = this.surname;
         this.surname = surname;
-		save();
+        try {
+            save();
+        } catch (IOException e) {
+            this.surname = oldSurname;
+            throw e;
+        }
     }
-
-    public void setAge(String age) {
+    public void setAge(String age) throws IOException {
+        String oldAge = this.age;
         this.age = age;
-		save();
+        try {
+            save();
+        } catch (IOException e) {
+            this.age = oldAge;
+            throw e;
+        }
     }
 
-    public void setEmailAddress(String emailAddress) {
+    public void setEmailAddress(String emailAddress) throws IOException {
+        String oldEmailAddress = this.emailAddress;
         this.emailAddress = emailAddress;
-		save();
+        try {
+            save();
+        } catch (IOException e) {
+            this.emailAddress = oldEmailAddress;
+            throw e;
+        }
     }
-
-    public void setProfilePhotoPath(String profilePhotoPath) {
+    
+    public void setProfilePhotoPath(String profilePhotoPath) throws IOException {
+        String oldProfilePhotoPath = this.profilePhotoPath;
         this.profilePhotoPath = profilePhotoPath;
-		save();
+        try {
+            save();
+        } catch (IOException e) {
+            this.profilePhotoPath = oldProfilePhotoPath;
+            throw e;
+        }
     }
 
     public String getPassword() {

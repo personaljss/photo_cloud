@@ -1,24 +1,25 @@
 package models;
 
 import java.awt.image.ImageFilter;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import exceptions.UserAlreadyLikedPhotoException;
 import exceptions.UserDidNotLikePhotoException;
 import services.ImageMatrix;
 import services.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Photo implements Serializable {
 	/**
@@ -33,11 +34,11 @@ public class Photo implements Serializable {
 	private boolean isPublic;
 	private transient ImageMatrix imageMatrix;
 	private String extension;
-	public static String dataFile = "imageData.txt";
+	public static String DATA_FILE = "imageData.txt";
 
 	private static int id = 0;
 
-	public Photo(User owner,String fileName, String extension) {
+	protected Photo(User owner,String fileName, String extension) {
 		this.owner = owner;
 		this.appliedFilters = new ArrayList<>();
 		this.comments = new ArrayList<Comment>();
@@ -45,8 +46,59 @@ public class Photo implements Serializable {
 		this.extension = extension;
 		this.fileName = fileName;
 	}
+	
+	/**
+	 * Creates a new photo.
+	 * 
+	 * This method creates a new Photo object and associates it with the given user.
+	 * It first generates a unique name for the photo, then creates a directory for the photo in the user's directory.
+	 * It then copies the source file to the new directory and creates a data file for the photo. If any errors occur during these operations, they are propagated as an IOException.
+	 * 
+	 * Note: This method expects that the source file is an image and that its extension is one that can be handled by the JavaFX Swing library.
+	 * 
+	 * @param user The user who will own the photo
+	 * @param sourceFile The file containing the source image
+	 * @return The created Photo object
+	 * @throws IOException if an I/O error occurs
+	 * @throws IllegalArgumentException if the source file is not an image or has an unsupported extension
+	 */
+	public static Photo create(User user, File sourceFile) throws IOException {
+	    // Extract the extension of the source file
+	    String fullImageName = sourceFile.getName();
+	    String extension = fullImageName.substring(fullImageName.lastIndexOf('.'), fullImageName.length());
+	    
+	    // Check that the extension is one that can be handled by JavaFX Swing
+	    if (!extension.matches(".+(jpg|png|gif|bmp)$")) {
+	        throw new IllegalArgumentException("Unsupported file extension: " + extension);
+	    }
+	    
+	    // Generate a unique name for the photo
+	    String imageName = generateName(user, extension);
+	    
+	    // Create the directory for the photo
+	    Path targetDirectory = Paths.get("data/" + user.getNickname() + "/images/" + imageName);
+	    Files.createDirectories(targetDirectory); // May throw IOException
+	    
+	    // Copy the source file to the new directory
+	    Path targetPath = targetDirectory.resolve(imageName + extension);
+	    Files.copy(sourceFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING); // May throw IOException
+
+	    // Create the data file for the photo
+	    File dataFile = new File(targetDirectory + "/" + DATA_FILE);
+	    dataFile.createNewFile(); // May throw IOException
+
+	    // Create the Photo object
+	    Photo photo = new Photo(user, imageName, extension);
+
+	    // Save the photo to the data file
+	    photo.save();
+
+	    // Add the photo to the user's album
+	    user.addPhoto(photo);
 
 
+	    return photo;
+	}
 
 	public static String generateName(User user, String extension) {
 	    File imagesDirectory = new File("data/" + user.getNickname() + "/images/");
@@ -113,23 +165,7 @@ public class Photo implements Serializable {
 	}
 
 	public File getDataFile() {
-	    File file = new File("data/" + owner.getNickname() + "/images/" + fileName + "/" + dataFile);
-	    /*
-	    // Create the directories if they do not exist
-	    File parentDirectory = file.getParentFile();
-	    if (!parentDirectory.exists()) {
-	        parentDirectory.mkdirs();
-	    }
-
-	    // Create the file if it does not exist
-	    if (!file.exists()) {
-	        try {
-	            file.createNewFile();
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
-	    */
+	    File file = new File("data/" + owner.getNickname() + "/images/" + fileName + "/" + DATA_FILE);
 	    return file;
 	}
 

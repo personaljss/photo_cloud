@@ -11,6 +11,9 @@ import java.util.List;
 
 import services.Logger;
 
+/**
+ * Singleton class that maintains the state of the application.
+ */
 public class AppState {
 	private HashMap<String, User> users;
 
@@ -24,7 +27,7 @@ public class AppState {
 		}
 	}
 
-	public static AppState getInstance() {
+	public static synchronized AppState getInstance() {
 		if (instance == null) {
 			instance = new AppState();
 		}
@@ -39,62 +42,86 @@ public class AppState {
 		this.users = users;
 	}
 
+	/**
+	 * Reads all users and their photos from the file system.
+	 */
 	public void readAllData() {
-		// The path to the directory
 		File dir = new File("data/");
 
-		// Get all the files from a directory
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
 			for (File child : directoryListing) {
-				// If the file is a directory, read the "user.txt" file in it
 				if (child.isDirectory()) {
-					File userFile = new File(child, "user.txt");
-					if (userFile.exists()) {
-						try (ObjectInputStream userIn = new ObjectInputStream(new FileInputStream(userFile))) {
-							User user = (User) userIn.readObject();
-							users.put(user.getNickname(), user);
-							// Read photos in data/username/images/
-							File imagesDirectory = new File("data/"+user.getNickname()+"/images/");
-					        if (imagesDirectory.exists()) {
-					            File[] photoDirectories = imagesDirectory.listFiles();
-                                List<Photo> photos = new ArrayList<>();
-					            if (photoDirectories != null) {
-					                for (File photoDirectory : photoDirectories) {
-					                    if (photoDirectory.isDirectory()) {
-					                        File dataFile = new File(photoDirectory, Photo.dataFile);
-					                        if (dataFile.exists()) {
-					                            try (ObjectInputStream dataIn = new ObjectInputStream(
-					                                    new FileInputStream(dataFile))) {
-					                                while (true) {
-					                                    try {
-					                                        Photo photo = (Photo) dataIn.readObject();
-					                                        photos.add(photo);
-					                                    } catch (EOFException e) {
-					                                        break;
-					                                    }
-					                                }
-					                            } catch (IOException | ClassNotFoundException e) {
-					                                e.printStackTrace();
-					                            }
-					                        }
-					                    }
-					                }
-					                
-					            }
-                                user.setAlbum(photos);
-					        }else {
-					        	
-					        }
-					    
-						} catch (IOException | ClassNotFoundException e) {
-							Logger.logError(e.getMessage());
-						}
-					}
+					readUser(child);
 				}
 			}
 		}
 	}
+
+	/**
+	 * Reads a user from the file system.
+	 *
+	 * @param userDir the directory of the user.
+	 */
+	private void readUser(File userDir) {
+		File userFile = new File(userDir, "user.txt");
+		if (userFile.exists()) {
+			try (ObjectInputStream userIn = new ObjectInputStream(new FileInputStream(userFile))) {
+				User user = (User) userIn.readObject();
+				users.put(user.getNickname(), user);
+
+				readImages(user);
+			} catch (IOException | ClassNotFoundException e) {
+				Logger.logError(e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Reads the images of a user from the file system.
+	 *
+	 * @param user the user.
+	 */
+	private void readImages(User user) {
+		File imagesDirectory = new File("data/" + user.getNickname() + "/images/");
+		if (imagesDirectory.exists()) {
+			File[] photoDirectories = imagesDirectory.listFiles();
+			List<Photo> photos = new ArrayList<>();
+			if (photoDirectories != null) {
+				for (File photoDirectory : photoDirectories) {
+					if (photoDirectory.isDirectory()) {
+						readPhoto(photoDirectory, photos);
+					}
+				}
+			}
+			user.setAlbum(photos);
+		}
+	}
+
+	/**
+	 * Reads a photo from the file system and adds it to a list of photos.
+	 *
+	 * @param photoDirectory the directory of the photo.
+	 * @param photos         the list of photos.
+	 */
+	private void readPhoto(File photoDirectory, List<Photo> photos) {
+		File dataFile = new File(photoDirectory, Photo.DATA_FILE);
+		if (dataFile.exists()) {
+			try (ObjectInputStream dataIn = new ObjectInputStream(new FileInputStream(dataFile))) {
+				while (true) {
+					try {
+						Photo photo = (Photo) dataIn.readObject();
+						photos.add(photo);
+					} catch (EOFException e) {
+						break;
+					}
+				}
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	public User getUser(String nickName) {
 		return users.get(nickName);

@@ -1,10 +1,7 @@
 package auth;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 
+import java.io.IOException;
 import models.AppState;
 import models.User;
 import services.Logger;
@@ -13,9 +10,6 @@ import services.Logger;
  * Singleton class responsible for user authentication operations: logging in and signing up.
  */
 public class Authentication {
-	// The directory that stores user data
-	private static String dataPath = "data/";
-
 	// The currently logged in user
 	@SuppressWarnings("unused")
 	private User user;
@@ -72,58 +66,32 @@ public class Authentication {
 	public AuthResult signUp(String nickName, String password, String realName, String surname, String age, String emailAddress, String type) {
 	    AuthResult result = null;
 	    if(!checkNickName(nickName)) {
-	    	return new AuthResult(false, "Inappropriate nickname");	    	
+	        return new AuthResult(false, "Inappropriate nickname");        
 	    }
 	    if(!checkPassword(password)) {
-	    	return new AuthResult(false, "Inappropriate password");
+	        return new AuthResult(false, "Inappropriate password");
 	    }
 	    if(!checkEmail(emailAddress)) {
-	    	return new AuthResult(false,"Invalid email");
+	        return new AuthResult(false,"Invalid email");
 	    }
 	    if(!checkAge(age)) {
-	    	return new AuthResult(false,"Invalid age");
+	        return new AuthResult(false,"Invalid age");
 	    }
-	    
-	    File userFolder = new File(dataPath, nickName);
-	    File userFile = new File(userFolder, "user.txt");
-	    if (userFolder.exists()) {
-	        result = new AuthResult(false, "User already exists. Please log in.");
-	    } else {//The user folder DNE, so we should create a folder
-	        try {
-	            boolean folderCreated = userFolder.mkdir();
-	            if (!folderCreated) {
-	                throw new IOException("Could not create user folder.");
-	            }
-	       
-	            // Create images folder inside user folder
-	            File imagesFolder = new File(userFolder, "images");
-	            folderCreated = imagesFolder.mkdir();
-	            if (!folderCreated) {
-	                throw new IOException("Could not create images folder.");
-	            }
-	            
-	            // Create the User object
-	            User user = User.create(nickName, password, realName, surname, age, emailAddress, type);
-
-	            // Serialize the User object
-	            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(userFile))) {
-	                oos.writeObject(user);
-		            result = new AuthResult(true, "Signed up successfully");
-		            appState.addUser(user);
-	            } catch (IOException e) {
-	                // Handle the exception here
-	                Logger.logError(e.getMessage());	            
-	                result = new AuthResult(false, "A problem occurred.");
-	            }
-
-	        } catch (IOException e) {
-	            result = new AuthResult(false, "A problem occurred.");
-	            Logger.logError(e.getMessage());
-	        }
+	    if (User.exists(nickName)) {
+	        return new AuthResult(false, "User already exists. Please log in.");
 	    }
-	    Logger.logInfo(nickName + ": " + (result != null ? result.getMessage() : "null"));
+	    try {
+	        User user = User.create(nickName, password, realName, surname, age, emailAddress, type);
+	        appState.addUser(user);
+	        result = new AuthResult(true, "Signed up successfully");
+	    } catch (IOException e) {
+	        result = new AuthResult(false, "A problem occurred.");
+	        Logger.logError(e.getMessage());
+	    }
+	    Logger.logInfo("User " + nickName + " created.");
 	    return result;
 	}
+
 
 
 	// The following methods are placeholders for checks for password, nickname, age, and email address
