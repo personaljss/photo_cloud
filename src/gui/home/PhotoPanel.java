@@ -6,20 +6,25 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import auth.Authentication;
+import gui.profile.PhotoEditingFrame;
 import models.Photo;
 import services.ImageMatrix;
 
-public class PhotoPanel extends JPanel {
+public class PhotoPanel extends JPanel implements ActionListener{
 
     /**
      * 
@@ -38,7 +43,7 @@ public class PhotoPanel extends JPanel {
         this.photo = photo;
         setLayout(new BorderLayout());
 
-        // Assuming you have a default image path+
+        // Assuming you have a default image path
         originalImage = ImageIO.read(photo.getImageFile());
         BufferedImage resizedImage = resizeImage(originalImage, STANDARD_WIDTH, STANDARD_HEIGHT);
         imageMatrix = new ImageMatrix(resizedImage);
@@ -58,15 +63,15 @@ public class PhotoPanel extends JPanel {
         gbc.gridy = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        JLabel nicknameLabel = new JLabel("Nickname: " + "User Nickname", SwingConstants.CENTER);
+        JLabel nicknameLabel = new JLabel("Nickname: " + photo.getOwner().getNickname(), SwingConstants.CENTER);
         nicknameLabel.setForeground(Color.WHITE);
         infoPanel.add(nicknameLabel, gbc);
 
-        JLabel likesLabel = new JLabel("Likes: " + "Number of likes", SwingConstants.CENTER);
+        JLabel likesLabel = new JLabel("Likes: " + photo.getLikes().size(), SwingConstants.CENTER);
         likesLabel.setForeground(Color.WHITE);
         infoPanel.add(likesLabel, gbc);
 
-        JLabel commentsLabel = new JLabel("Comments: " + "Number of comments", SwingConstants.CENTER);
+        JLabel commentsLabel = new JLabel("Comments: " + photo.getComments().size(), SwingConstants.CENTER);
         commentsLabel.setForeground(Color.WHITE);
         infoPanel.add(commentsLabel, gbc);
 
@@ -94,7 +99,17 @@ public class PhotoPanel extends JPanel {
                 // Hide info panel
                 infoPanel.setVisible(false);
             }
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
+        		System.out.print("clicked");
+            	if(Authentication.getInstance().getCurrentUser().equals(photo.getOwner())) {
+            		new PhotoEditingFrame(photo);
+            	}
+            }
+            
         });
+        
     }
 
     private BufferedImage blurImage() {
@@ -137,4 +152,10 @@ public class PhotoPanel extends JPanel {
         graphics.dispose();
         return bufferedImage;
     }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+
+	}
 }
