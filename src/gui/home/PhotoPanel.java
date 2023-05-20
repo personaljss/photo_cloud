@@ -2,6 +2,7 @@ package gui.home;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -24,24 +25,24 @@ import gui.profile.PhotoEditingFrame;
 import models.Photo;
 import services.ImageMatrix;
 
-public class PhotoPanel extends JPanel implements ActionListener{
+public class PhotoPanel extends JPanel {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1305911466389510173L;
     private Photo photo;
     private BufferedImage originalImage;
     private ImageMatrix imageMatrix;
     private JLabel photoLabel;
     private JPanel infoPanel;
+    private JLabel descriptionLabel;
 
     private static final int STANDARD_WIDTH = 300;
     private static final int STANDARD_HEIGHT = 200;
+    private static final Dimension PANEL_SIZE = new Dimension(STANDARD_WIDTH, STANDARD_HEIGHT);
 
     public PhotoPanel(Photo photo) throws IOException {
         this.photo = photo;
         setLayout(new BorderLayout());
+        setPreferredSize(PANEL_SIZE);
 
         // Assuming you have a default image path
         originalImage = ImageIO.read(photo.getImageFile());
@@ -63,17 +64,9 @@ public class PhotoPanel extends JPanel implements ActionListener{
         gbc.gridy = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        JLabel nicknameLabel = new JLabel("Nickname: " + photo.getOwner().getNickname(), SwingConstants.CENTER);
-        nicknameLabel.setForeground(Color.WHITE);
-        infoPanel.add(nicknameLabel, gbc);
-
-        JLabel likesLabel = new JLabel("Likes: " + photo.getLikes().size(), SwingConstants.CENTER);
-        likesLabel.setForeground(Color.WHITE);
-        infoPanel.add(likesLabel, gbc);
-
-        JLabel commentsLabel = new JLabel("Comments: " + photo.getComments().size(), SwingConstants.CENTER);
-        commentsLabel.setForeground(Color.WHITE);
-        infoPanel.add(commentsLabel, gbc);
+        descriptionLabel = new JLabel(photo.getDescription());
+        descriptionLabel.setForeground(Color.WHITE);
+        infoPanel.add(descriptionLabel, gbc);
 
         // Add info panel to photo label
         photoLabel.setLayout(new GridBagLayout());
@@ -99,17 +92,23 @@ public class PhotoPanel extends JPanel implements ActionListener{
                 // Hide info panel
                 infoPanel.setVisible(false);
             }
-            
+
             @Override
             public void mouseClicked(MouseEvent e) {
-        		System.out.print("clicked");
-            	if(Authentication.getInstance().getCurrentUser().equals(photo.getOwner())) {
-            		new PhotoEditingFrame(photo);
-            	}
+                System.out.print("clicked");
+                if (Authentication.getInstance().getCurrentUser().equals(photo.getOwner())) {
+                    new PhotoEditingFrame(photo);
+                }
             }
-            
+
         });
-        
+
+    }
+
+    public void setDescription(String txt) {
+        descriptionLabel.setText(txt);
+        descriptionLabel.revalidate();
+        descriptionLabel.repaint();
     }
 
     private BufferedImage blurImage() {
@@ -153,9 +152,5 @@ public class PhotoPanel extends JPanel implements ActionListener{
         return bufferedImage;
     }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+ 
 }

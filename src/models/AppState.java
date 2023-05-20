@@ -16,28 +16,23 @@ import services.Logger;
  */
 public class AppState {
 	private HashMap<String, User> users;
-	private List<Photo> discoveryContent;
 
 	private static AppState instance;
 
 	private AppState() {
 		users = new HashMap<>();
 		readAllData();
-		setDiscoveryContent();
 	}
-	
-	private void setDiscoveryContent(){
-		discoveryContent=new ArrayList<>();
-		for(User user: users.values()) {
-			for(Photo photo : user.getAlbum()) {
-				if(photo.isPublic()) {
+
+	public List<Photo> getDiscoveryContent() {
+		List<Photo> discoveryContent = new ArrayList<>();
+		for (User user : users.values()) {
+			for (Photo photo : user.getAlbum()) {
+				if (photo.isPublic()) {
 					discoveryContent.add(photo);
 				}
 			}
 		}
-	}
-	
-	public List<Photo> getDiscoveryContent(){
 		return discoveryContent;
 	}
 
@@ -135,8 +130,6 @@ public class AppState {
 			}
 		}
 	}
-	
-
 
 	public User getUser(String nickName) {
 		return users.get(nickName);

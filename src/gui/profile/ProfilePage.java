@@ -2,6 +2,7 @@ package gui.profile;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,17 +18,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import gui.home.DiscoveryPage;
 import gui.home.FileChooser;
-import gui.home.PhotoPanel;
+import listeners.GalleryActionListener;
 import models.Photo;
 import models.User;
 
 /**
  * Represents the profile page of a user.
  */
-public class ProfilePage extends JFrame {
+public class ProfilePage extends JFrame implements GalleryActionListener{
 
     private static final long serialVersionUID = 8018934881827210300L;
     private User user;
@@ -51,6 +53,8 @@ public class ProfilePage extends JFrame {
     private void initialize() {
         setTitle("Profile Page");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setMinimumSize(new Dimension(950, 700));
+        setLocationRelativeTo(null); // center the frame
         setBounds(100, 100, 800, 600);
         getContentPane().setLayout(new BorderLayout());
     }
@@ -105,17 +109,14 @@ public class ProfilePage extends JFrame {
      * Creates the right panel of the profile page.
      */
     private void createRightPanel() {
-        rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(0, 3, 10, 10));
-        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+        rightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Use FlowLayout instead of GridLayout
         JScrollPane scrollPane = new JScrollPane(rightPanel);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         displayImages();
+
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
@@ -126,7 +127,9 @@ public class ProfilePage extends JFrame {
 
         for (Photo photo : user.getAlbum()) {
             try {
-                rightPanel.add(new PhotoPanel(photo));
+            	GalleryPhotoPanel panel=new GalleryPhotoPanel(photo);
+            	panel.setGalleryActionListener(this);
+                rightPanel.add(panel);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,7 +153,16 @@ public class ProfilePage extends JFrame {
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
                 e.printStackTrace();
-            }
+            } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
+
+	@Override
+	public void delete(Photo photo) {
+		// TODO Auto-generated method stub
+		displayImages();
+	}
 }

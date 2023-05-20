@@ -1,9 +1,9 @@
 package gui.home;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import models.AppState;
 import models.Photo;
 
 /**
- * The Discovery Page class represents the user interface for the discovery feature.
+ * The DiscoveryPage class represents the user interface for the discovery feature.
  * It displays a grid of photos and allows the user to navigate to other pages.
  */
 public class DiscoveryPage extends JFrame {
@@ -82,11 +82,10 @@ public class DiscoveryPage extends JFrame {
      * Creates the main content panel with the search panel and photo grid.
      */
     private void createContentPanel() {
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        setContentPane(mainPanel);
+    	getContentPane().setLayout(new BorderLayout());
 
-        createLeftPanel(mainPanel);
-        createRightPanel(mainPanel);
+        createLeftPanel();
+        createRightPanel();
 
         pack();
         setVisible(true);
@@ -97,10 +96,12 @@ public class DiscoveryPage extends JFrame {
      *
      * @param mainPanel the main panel to which the search panel will be added.
      */
-    private void createLeftPanel(JPanel mainPanel) {
+
+    private void createLeftPanel() {
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setPreferredSize(new Dimension(200, getHeight()));
+        leftPanel.setMaximumSize(new Dimension(200, getHeight()));
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Search bar and button
@@ -113,11 +114,14 @@ public class DiscoveryPage extends JFrame {
         searchPanel.add(searchBar);
         searchPanel.add(searchButton);
 
+        // Align search button to the right
+        searchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         // Add search panel to the left panel
         leftPanel.add(searchPanel);
 
         // Add left panel to the main panel
-        mainPanel.add(leftPanel, BorderLayout.WEST);
+        getContentPane().add(leftPanel, BorderLayout.WEST);
     }
 
     /**
@@ -125,16 +129,17 @@ public class DiscoveryPage extends JFrame {
      *
      * @param mainPanel the main panel to which the photo grid panel will be added.
      */
-    private void createRightPanel(JPanel mainPanel) {
-        photoPanel = new JPanel(new GridLayout(0, 3, 10, 10));
+    private void createRightPanel() {
+        photoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Use FlowLayout instead of GridLayout
         JScrollPane scrollPane = new JScrollPane(photoPanel);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         addPhotosToGrid();
 
-        mainPanel.add(scrollPane, BorderLayout.EAST);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
+
 
     /**
      * Adds the photos to the photo grid panel.
@@ -142,11 +147,14 @@ public class DiscoveryPage extends JFrame {
     private void addPhotosToGrid() {
         for (Photo photo : photos) {
             try {
-                photoPanel.add(new PhotoPanel(photo));
+                DiscoveryPhotoPanel photoPanel = new DiscoveryPhotoPanel(photo);
+                photoPanel.setPreferredSize(new Dimension(300, 300)); // Set a fixed size for the panel
+                this.photoPanel.add(photoPanel);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        
     }
 
     /**
