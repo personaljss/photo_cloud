@@ -3,11 +3,13 @@ package gui.profile;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -15,11 +17,15 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import auth.Authentication;
 import gui.home.DiscoveryPage;
 import gui.home.FileChooser;
 import listeners.GalleryActionListener;
@@ -34,6 +40,8 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
     private static final long serialVersionUID = 8018934881827210300L;
     private User user;
     private JPanel rightPanel;
+    private JMenuBar menuBar;
+    private JPanel leftPanel;
 
     /**
      * Creates a new ProfilePage instance.
@@ -45,6 +53,7 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
         initialize();
         createLeftPanel();
         createRightPanel();
+        createMenuBar();
     }
 
     /**
@@ -63,26 +72,41 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
      * Creates the left panel of the profile page.
      */
     private void createLeftPanel() {
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel = new JPanel(new BorderLayout());
         leftPanel.setPreferredSize(new Dimension(200, getHeight()));
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Add profile picture (assuming you have a default profile picture path)
-        JLabel profilePicLabel = new JLabel(new ImageIcon("resources/likeIcon.png"));
-        leftPanel.add(profilePicLabel);
+        // Create the profile photo panel
+        ProfilePhotoPanel profilePhotoPanel = null;
+		try {
+			profilePhotoPanel = new ProfilePhotoPanel(resizeImage(loadProfileImage(), 150, 150), 150);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        leftPanel.add(profilePhotoPanel, BorderLayout.NORTH);
 
-        // Add user information
+        // Create the user information panel
+        JPanel userInfoPanel = new JPanel();
+        userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));
+        userInfoPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
         JLabel nicknameLabel = new JLabel("Nickname: " + user.getNickname());
-        leftPanel.add(nicknameLabel);
+        userInfoPanel.add(nicknameLabel);
 
         JLabel emailLabel = new JLabel("Email: " + user.getEmailAddress());
-        leftPanel.add(emailLabel);
+        userInfoPanel.add(emailLabel);
 
         JLabel ageLabel = new JLabel("Age: " + user.getAge());
-        leftPanel.add(ageLabel);
+        userInfoPanel.add(ageLabel);
 
-        // Add image upload button
+        leftPanel.add(userInfoPanel, BorderLayout.CENTER);
+
+        // Create the button panel
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
         JButton uploadButton = new JButton("Upload Image");
         uploadButton.addActionListener(new ActionListener() {
             @Override
@@ -90,19 +114,67 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
                 uploadPhoto();
             }
         });
-        leftPanel.add(uploadButton);
+        buttonPanel.add(uploadButton);
 
-        getContentPane().add(leftPanel, BorderLayout.WEST);
-        
         JButton discoveryButton = new JButton("Discovery");
         discoveryButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		new DiscoveryPage();
-        		ProfilePage.this.dispose();
-        	}
+            public void actionPerformed(ActionEvent e) {
+                new DiscoveryPage();
+                ProfilePage.this.dispose();
+            }
         });
-        leftPanel.add(discoveryButton);
+        buttonPanel.add(discoveryButton);
+
+        leftPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        getContentPane().add(leftPanel, BorderLayout.WEST);
         setVisible(true);
+    }
+
+
+	private BufferedImage loadProfileImage() throws IOException {
+		// TODO Auto-generated method stub
+		return ImageIO.read(user.getProfilePhoto());
+	}
+
+	/**
+     * Creates the menu bar and adds menu items.
+     */
+    private void createMenuBar() {
+        menuBar = new JMenuBar();
+
+        JMenu navigationMenu = new JMenu("Navigation");
+        JMenuItem discoveryMenuItem = new JMenuItem("Discovery");
+        discoveryMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	navigateToDicoveryPage();
+            }
+
+        });
+        navigationMenu.add(discoveryMenuItem);
+        menuBar.add(navigationMenu);
+        
+        JMenu optionsMenu = new JMenu("Options");
+        JMenuItem credentialsMenuItem = new JMenuItem("Credentials");
+        credentialsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	new ChangeCredentialsWindow(ProfilePage.this);
+            }
+
+        });
+        
+        optionsMenu.add(credentialsMenuItem);
+        menuBar.add(optionsMenu);
+
+        setJMenuBar(menuBar);
+    }
+    
+    
+    private void navigateToDicoveryPage() {
+        new DiscoveryPage();
+        dispose();
     }
 
     /**
@@ -165,4 +237,27 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
 		// TODO Auto-generated method stub
 		displayImages();
 	}
+
+	private BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
+	    BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+	    Graphics2D g2d = resizedImage.createGraphics();
+	    g2d.drawImage(originalImage, 0, 0, width, height, null);
+	    g2d.dispose();
+	    return resizedImage;
+	}
+
+	public void updateUser() {
+	    // Remove the old leftPanel from the frame
+	    getContentPane().remove(leftPanel);
+	    
+	    // Create a new leftPanel with the updated user information
+	    createLeftPanel();
+	    
+	    // Add the new leftPanel to the frame
+	    getContentPane().add(leftPanel, BorderLayout.WEST);
+	    
+	    revalidate(); // Revalidate the frame to reflect the changes
+	}
+
+
 }
