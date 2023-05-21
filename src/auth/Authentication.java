@@ -97,20 +97,20 @@ public class Authentication {
 	// The following methods are placeholders for checks for password, nickname, age, and email address
 	// TODO: Implement these methods with actual checks
 
-	private boolean checkPassword(String password) {
+	public boolean checkPassword(String password) {
 	    // Password should be at least 5 characters long and include at least one digit.
 	    String passwordPattern = "^(?=.*[0-9]).{5,}$";
 	    return password.matches(passwordPattern);
 	}
 
 
-	private boolean checkNickName(String nickName) {
+	public boolean checkNickName(String nickName) {
 	    // Nickname should start with a letter and can contain letters, numbers, and underscores.
 	    String nicknamePattern = "^[a-zA-Z]\\w*$";
 	    return nickName.matches(nicknamePattern);
 	}
 
-	private boolean checkAge(String age) {
+	public boolean checkAge(String age) {
 	    // Age should be a positive number less than 130 (oldest human recorded was 122 years old).
 	    try {
 	        int ageNumber = Integer.parseInt(age);
@@ -120,8 +120,10 @@ public class Authentication {
 	        return false;
 	    }
 	}
+	
+	
 
-	private boolean checkEmail(String emailAddress) {
+	public boolean checkEmail(String emailAddress) {
 	    // Simple email validation. There are more complex patterns that could be used here.
 	    String emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
 	    return emailAddress.matches(emailPattern);

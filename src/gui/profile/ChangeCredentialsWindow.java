@@ -25,19 +25,24 @@ public class ChangeCredentialsWindow extends JFrame {
     private JTextField emailTextField;
     private JTextField passwordTextField;
     private JTextField ageTextField;
+    private User user;
 
     // Constructor
     public ChangeCredentialsWindow(ProfilePage profilePage) {
         this.profilePage = profilePage;
+        this.user=Authentication.getInstance().getCurrentUser();
 
         JLabel emailLabel = new JLabel("Email:");
         emailTextField = new JTextField(20);
+        emailTextField.setText(user.getEmailAddress());
 
         JLabel passwordLabel = new JLabel("Password:");
         passwordTextField = new JTextField(20);
+        passwordTextField.setText(user.getPassword());
 
         JLabel ageLabel = new JLabel("Age:");
         ageTextField = new JTextField(20);
+        ageTextField.setText(user.getAge());
 
         JButton approveButton = new JButton("Approve");
         approveButton.addActionListener(new ActionListener() {

@@ -1,7 +1,9 @@
 package utils;
 
+import java.awt.image.BufferedImage;
+
 import services.ImageMatrix;
 
 interface ImageFilter {
-    void apply(ImageMatrix image);
+	BufferedImage apply(ImageMatrix image);
 }

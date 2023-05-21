@@ -1,5 +1,7 @@
 package models;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageFilter;
 import java.io.File;
@@ -14,8 +16,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 import exceptions.UserAlreadyLikedPhotoException;
 import exceptions.UserDidNotLikePhotoException;
@@ -194,37 +199,29 @@ public class Photo implements Serializable {
         }
     }
 
-	public BufferedImage blurImage() {
-		// Use a 5x5 Gaussian blur kernel for more blur
-		int[][] kernel = { { 1, 4, 6, 4, 1 }, { 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 },
-				{ 1, 4, 6, 4, 1 } };
-		int kernelSum = 256; // Sum of all elements in the kernel
+    
+    /**
+     * Retrieves a resized version of the original image.
+     * 
+     * @param width  the desired width of the resized image
+     * @param height the desired height of the resized image
+     * @return the resized image
+     * @throws IOException if an error occurs while reading the image file
+     */
+    public BufferedImage getResizedImage(int width, int height) throws IOException {
+        BufferedImage originalImage = ImageIO.read(getImageFile());
+        BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-		ImageMatrix blurredMatrix = new ImageMatrix(imageMatrix.getWidth(), imageMatrix.getHeight());
+        // Resize the image using Graphics2D and interpolation hints
+        Graphics2D graphics = resizedImage.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.drawImage(originalImage, 0, 0, width, height, null);
+        graphics.dispose();
 
-		// Apply the kernel to each pixel in the image
-		for (int i = 2; i < imageMatrix.getWidth() - 2; i++) {
-			for (int j = 2; j < imageMatrix.getHeight() - 2; j++) {
-				int red = 0, green = 0, blue = 0;
-
-				for (int ki = -2; ki <= 2; ki++) {
-					for (int kj = -2; kj <= 2; kj++) {
-						red += kernel[ki + 2][kj + 2] * imageMatrix.getRed(i + ki, j + kj);
-						green += kernel[ki + 2][kj + 2] * imageMatrix.getGreen(i + ki, j + kj);
-						blue += kernel[ki + 2][kj + 2] * imageMatrix.getBlue(i + ki, j + kj);
-					}
-				}
-
-				red /= kernelSum;
-				green /= kernelSum;
-				blue /= kernelSum;
-
-				blurredMatrix.setRGB(i, j, ImageMatrix.convertRGB(red, green, blue));
-			}
-		}
-
-		return blurredMatrix.getBufferedImage();
-	}
+        return resizedImage;
+    }
+    
+    
 
 	public String getDescription() {
 		if (description == null) {
@@ -355,7 +352,7 @@ public class Photo implements Serializable {
 	}
 
 	public void disLike(User user) throws UserDidNotLikePhotoException, FileNotFoundException, IOException {
-		if (likes.contains(user)) {
+		if (!likes.contains(user)) {
 			throw new UserDidNotLikePhotoException();
 		} else {
 			likes.remove(user);
@@ -369,13 +366,15 @@ public class Photo implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		if(other instanceof Photo) {
-			if(this.fileName.equals(((Photo)other).getFileName())){
-				return true;
-			}
-		}
-		return false;
+	public boolean equals(Object obj) {
+	    if (this == obj) {
+	        return true;
+	    }
+	    if (obj == null || getClass() != obj.getClass()) {
+	        return false;
+	    }
+	    Photo otherPhoto = (Photo) obj;
+	    return Objects.equals(fileName, otherPhoto.fileName);
 	}
 
 	@Override

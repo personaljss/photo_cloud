@@ -23,7 +23,7 @@ public abstract class User implements Serializable {
 	private String surname;
 	private String age;
 	private String emailAddress;
-	private String profilePhotoPath = "default.jpg"; // default profile photo
+	private String profilePhotoPath = "resources/likeIcon.png"; // default profile photo
 	private List<Photo> album;
 
 	public User(String nickname, String password, String realName, String surname, String age, String emailAddress) {
@@ -134,25 +134,18 @@ public abstract class User implements Serializable {
 	}
 	
 	public void removePhoto(Photo photo) throws Exception {
-		int index=-1;
-		for(int i=0; i<album.size(); i++) {
-			if(album.get(i).getFileName().equals(photo.getFileName())) {
-				index=i;
-				break;
-			}
-		}
-		if(index==-1) {
-			throw new Exception("Hayyyyyyyyyyyy");
-		}
-		album.remove(index);
-		try {
-			
-			save();
-		} catch (Exception e) {
-			album.add(photo);
-			throw e;
-		}
+	    boolean removed = album.remove(photo);
+	    if (!removed) {
+	        throw new Exception("Photo not found");
+	    }
+	    try {
+	        save();
+	    } catch (Exception e) {
+	        album.add(photo);
+	        throw e;
+	    }
 	}
+
 
 	public List<Photo> getAlbum() {
 		return album;
@@ -272,6 +265,12 @@ public abstract class User implements Serializable {
 	public String getProfilePhotoPath() {
 		return profilePhotoPath;
 	}
+	
+	public File getProfilePhoto() {
+		return new File(profilePhotoPath);
+	}
+
+
 
 	public abstract void applyFilter(String filterName);
 

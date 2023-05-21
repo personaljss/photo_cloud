@@ -1,6 +1,5 @@
 package gui.home;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -8,14 +7,19 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import auth.Authentication;
+import exceptions.UserAlreadyLikedPhotoException;
+import exceptions.UserDidNotLikePhotoException;
 import models.Photo;
+import models.User;
 
 /**
  * Represents a photo panel in the discovery page.
@@ -28,6 +32,7 @@ public class DiscoveryPhotoPanel extends JPanel {
     private JButton commentButton;
     private JButton profileButton;
     private Photo photo;
+    private User user;
 
     /**
      * Constructs a new DiscoveryPhotoPanel object.
@@ -37,6 +42,7 @@ public class DiscoveryPhotoPanel extends JPanel {
      */
     public DiscoveryPhotoPanel(Photo photo) throws IOException {
         this.photo = photo;
+        this.user=Authentication.getInstance().getCurrentUser();
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         createComponents();
@@ -51,10 +57,53 @@ public class DiscoveryPhotoPanel extends JPanel {
             photoPanel = new PhotoPanel(photo);
         } catch (IOException e1) {
             e1.printStackTrace();
+            return;
         }
 
-        likeButton = new JButton("Like");
+        likeButton = new JButton();
+        updateLikeButtonIcon(); // Set the initial icon based on the user's like status
+
+        likeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("clicked");
+                if (!photo.getLikes().contains(user)) {
+                    try {
+                        photo.like(user);
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (UserAlreadyLikedPhotoException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    try {
+                        photo.disLike(user);
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
+                    } catch (UserDidNotLikePhotoException e1) {
+                        e1.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                likeButton.setText(Integer.toString(photo.getLikes().size()));
+                updateLikeButtonIcon(); // Update the icon based on the user's like status
+                likeButton.revalidate();
+                likeButton.repaint();
+            }
+        });
         commentButton = new JButton("Comment");
+        commentButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//
+				new CommentWindow(photo);
+			}
+        	
+        });
 
         profileButton = new JButton(photo.getOwner().getNickname());
         profileButton.addActionListener(new ActionListener() {
@@ -65,6 +114,14 @@ public class DiscoveryPhotoPanel extends JPanel {
         });
     }
 
+    private void updateLikeButtonIcon() {
+        if (photo.getLikes().contains(user)) {
+            likeButton.setIcon(new ImageIcon("resources/likedIcon.png"));
+        } else {
+            likeButton.setIcon(new ImageIcon("resources/dislikedIcon.png"));
+        }
+    }
+    
     /**
      * Adds the components to the discovery photo panel.
      */

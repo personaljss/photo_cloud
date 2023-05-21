@@ -7,14 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,6 +21,7 @@ import auth.Authentication;
 import gui.profile.PhotoEditingFrame;
 import models.Photo;
 import services.ImageMatrix;
+import utils.BlurFilter;
 
 public class PhotoPanel extends JPanel {
 
@@ -44,9 +42,7 @@ public class PhotoPanel extends JPanel {
         setLayout(new BorderLayout());
         setPreferredSize(PANEL_SIZE);
 
-        // Assuming you have a default image path
-        originalImage = ImageIO.read(photo.getImageFile());
-        BufferedImage resizedImage = resizeImage(originalImage, STANDARD_WIDTH, STANDARD_HEIGHT);
+        BufferedImage resizedImage = photo.getResizedImage(STANDARD_WIDTH, STANDARD_HEIGHT);
         imageMatrix = new ImageMatrix(resizedImage);
 
         // Prepare photo label
@@ -77,7 +73,7 @@ public class PhotoPanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 // Blur the image
-                BufferedImage blurredImage = blurImage();
+                BufferedImage blurredImage = new BlurFilter().apply(imageMatrix);
                 photoLabel.setIcon(new ImageIcon(blurredImage));
 
                 // Show info panel
@@ -111,46 +107,6 @@ public class PhotoPanel extends JPanel {
         descriptionLabel.repaint();
     }
 
-    private BufferedImage blurImage() {
-        // Use a 5x5 Gaussian blur kernel for more blur
-        int[][] kernel = { { 1, 4, 6, 4, 1 }, { 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 },
-                { 1, 4, 6, 4, 1 } };
-        int kernelSum = 256; // Sum of all elements in the kernel
-
-        ImageMatrix blurredMatrix = new ImageMatrix(imageMatrix.getWidth(), imageMatrix.getHeight());
-
-        // Apply the kernel to each pixel in the image
-        for (int i = 2; i < imageMatrix.getWidth() - 2; i++) {
-            for (int j = 2; j < imageMatrix.getHeight() - 2; j++) {
-                int red = 0, green = 0, blue = 0;
-
-                for (int ki = -2; ki <= 2; ki++) {
-                    for (int kj = -2; kj <= 2; kj++) {
-                        red += kernel[ki + 2][kj + 2] * imageMatrix.getRed(i + ki, j + kj);
-                        green += kernel[ki + 2][kj + 2] * imageMatrix.getGreen(i + ki, j + kj);
-                        blue += kernel[ki + 2][kj + 2] * imageMatrix.getBlue(i + ki, j + kj);
-                    }
-                }
-
-                red /= kernelSum;
-                green /= kernelSum;
-                blue /= kernelSum;
-
-                blurredMatrix.setRGB(i, j, ImageMatrix.convertRGB(red, green, blue));
-            }
-        }
-
-        return blurredMatrix.getBufferedImage();
-    }
-
-    private BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
-        Image resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = bufferedImage.createGraphics();
-        graphics.drawImage(resizedImage, 0, 0, null);
-        graphics.dispose();
-        return bufferedImage;
-    }
-
+  
  
 }
