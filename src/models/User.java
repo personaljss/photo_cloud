@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +27,10 @@ public abstract class User implements Serializable {
 	private String surname;
 	private String age;
 	private String emailAddress;
-	private String profilePhotoPath = "resources/likeIcon.png"; // default profile photo
+	private String profilePhotoPath; 
 	private List<Photo> album;
+
+	private static String defaultProfilePhotoPath = "resources/defaultProfilePhoto.png";
 
 	public User(String nickname, String password, String realName, String surname, String age, String emailAddress) {
 		this.nickname = nickname;
@@ -33,6 +39,9 @@ public abstract class User implements Serializable {
 		this.surname = surname;
 		this.age = age;
 		this.emailAddress = emailAddress;
+		if (profilePhotoPath==null  || !Paths.get(profilePhotoPath).toFile().exists()) {
+			profilePhotoPath = defaultProfilePhotoPath;
+		}
 		album = new ArrayList<>();
 	}
 
@@ -102,6 +111,7 @@ public abstract class User implements Serializable {
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(user.getDataFile()))) {
 			oos.writeObject(user);
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new IOException("Could not write user data.");
 		}
 		return user;
@@ -132,20 +142,23 @@ public abstract class User implements Serializable {
 			throw e;
 		}
 	}
-	
-	public void removePhoto(Photo photo) throws Exception {
-	    boolean removed = album.remove(photo);
-	    if (!removed) {
-	        throw new Exception("Photo not found");
-	    }
-	    try {
-	        save();
-	    } catch (Exception e) {
-	        album.add(photo);
-	        throw e;
-	    }
-	}
 
+	public void removePhoto(Photo photo) throws Exception {
+		System.out.println(this);
+		boolean removed = album.remove(photo);
+		
+		if (!removed) {
+			throw new Exception("Photo not found");
+		}
+		
+		try {
+			save();
+			photo.delete();
+		} catch (Exception e) {
+			album.add(photo);
+			throw e;
+		}
+	}
 
 	public List<Photo> getAlbum() {
 		return album;
@@ -231,15 +244,45 @@ public abstract class User implements Serializable {
 		}
 	}
 
-	public void setProfilePhotoPath(String profilePhotoPath) throws IOException {
+	private void setProfilePhotoPath(Path destination) throws IOException {
 		String oldProfilePhotoPath = this.profilePhotoPath;
-		this.profilePhotoPath = profilePhotoPath;
+		this.profilePhotoPath = destination.toString();
 		try {
 			save();
 		} catch (IOException e) {
 			this.profilePhotoPath = oldProfilePhotoPath;
 			throw e;
 		}
+	}
+
+	public void updateProfilePhoto(File imageFile) throws IOException {
+		// Get the file extension
+		String extension = getFileExtension(imageFile);
+
+		// Generate the destination file path
+		String destinationPath = "data/" + nickname + "/profilePhoto." + extension;
+
+		// Create the destination directory if it doesn't exist
+		File destinationDir = new File("data/" + nickname);
+		if (!destinationDir.exists()) {
+			destinationDir.mkdirs();
+		}
+
+		// Copy the image file to the destination directory with the desired file name
+		Path sourcePath = imageFile.toPath();
+		Path destination = Path.of(destinationPath);
+		Files.copy(sourcePath, destination, StandardCopyOption.REPLACE_EXISTING);
+		setProfilePhotoPath(destination);
+
+	}
+
+	private String getFileExtension(File file) {
+		String fileName = file.getName();
+		int dotIndex = fileName.lastIndexOf(".");
+		if (dotIndex != -1 && dotIndex < fileName.length() - 1) {
+			return fileName.substring(dotIndex + 1).toLowerCase();
+		}
+		return "";
 	}
 
 	public String getPassword() {
@@ -262,15 +305,9 @@ public abstract class User implements Serializable {
 		return emailAddress;
 	}
 
-	public String getProfilePhotoPath() {
-		return profilePhotoPath;
-	}
-	
 	public File getProfilePhoto() {
-		return new File(profilePhotoPath);
+		return Paths.get(profilePhotoPath).toFile();
 	}
-
-
 
 	public abstract void applyFilter(String filterName);
 

@@ -1,15 +1,33 @@
 package gui.profile;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Dialog;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.swing.*;
-
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import listeners.PhotoListener;
 import models.Photo;
+import utils.BlurFilter;
+import utils.BrightnessFilter;
+import utils.EdgeDetectionFilter;
+import utils.GrayscaleFilter;
+import utils.SharpenFilter;
 
-public class PhotoEditingFrame extends JFrame {
+
+public class PhotoEditingFrame extends JFrame implements PhotoListener{
 
     /**
 	 * 
@@ -18,9 +36,11 @@ public class PhotoEditingFrame extends JFrame {
 	private Photo photo;
     private JLabel photoLabel;
 
-    public PhotoEditingFrame(Photo photo) {
-        this.photo = photo;
 
+	public PhotoEditingFrame(Photo photo) {
+        this.photo = photo;
+        photo.addListener(this);
+        
         setTitle("Photo Editing");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -52,14 +72,18 @@ public class PhotoEditingFrame extends JFrame {
         //parentFrame.setEnabled(false);
     }
 
-    /**
-     * Sets the photo to be displayed in the frame.
-     *
-     * @param photo the photo to set
-     */
-    public void setPhoto(Photo photo) {
-        this.photo = photo;
-        photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
+
+    
+    public void updatePhoto(BufferedImage image) {
+    	photoLabel.setIcon(new ImageIcon(image));
+        photoLabel.revalidate();
+        photoLabel.repaint();
+    }
+    
+    public void updatePhoto(Photo photo) {
+    	photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
+        photoLabel.revalidate();
+        photoLabel.repaint();
     }
 
     /**
@@ -79,6 +103,7 @@ public class PhotoEditingFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply blur filter to the photo
+            	new FilterDialog(PhotoEditingFrame.this,photo, new BlurFilter());
             }
         });
         filterMenu.add(blurMenuItem);
@@ -88,10 +113,41 @@ public class PhotoEditingFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply detect edges filter to the photo
+            	new FilterDialog(PhotoEditingFrame.this,photo, new EdgeDetectionFilter());
             }
         });
         filterMenu.add(detectEdgesMenuItem);
 
+        JMenuItem sharpenMenuItem = new JMenuItem("Sharpen");
+        sharpenMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Apply detect edges filter to the photo
+            	new FilterDialog(PhotoEditingFrame.this,photo, new SharpenFilter());
+            }
+        });
+        filterMenu.add(sharpenMenuItem);
+        
+        JMenuItem brightnessMenuItem = new JMenuItem("Brightness");
+        brightnessMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Apply detect edges filter to the photo
+            	new FilterDialog(PhotoEditingFrame.this,photo, new BrightnessFilter());
+            }
+        });
+        filterMenu.add(brightnessMenuItem);
+        
+        JMenuItem grayScaleMenuItem = new JMenuItem("GrayScale");
+        grayScaleMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Apply detect edges filter to the photo
+            	new FilterDialog(PhotoEditingFrame.this,photo, new GrayscaleFilter());
+            }
+        });
+        filterMenu.add(grayScaleMenuItem);
+        
         // Add the filter menu to the menu bar
         menuBar.add(filterMenu);
 
@@ -126,7 +182,7 @@ public class PhotoEditingFrame extends JFrame {
                 
                 // Create a panel with the text field
                 Object[] message = {
-                    "Enter your name:", textField
+                    "Enter the description:", textField
                 };
                 
                 int option = JOptionPane.showOptionDialog(null, message, "Enter description", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
@@ -151,10 +207,43 @@ public class PhotoEditingFrame extends JFrame {
         return menuBar;
     }
 
-    @Override
+    @Override 
     public void dispose() {
-        // Enable the parent frame when this frame is disposed
-        //parentFrame.setEnabled(true);
-        super.dispose();
+    	photo.removeListener(this);
+    	super.dispose();
     }
+
+	@Override
+	public void onDeleted(Photo photo) {
+		// TODO Auto-generated method stub
+		dispose();
+	}
+
+
+
+	@Override
+	public void onFilterApplied(Photo photo) {
+		// TODO Auto-generated method stub
+        photoLabel = new JLabel();
+        photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
+        photoLabel.revalidate();
+        photoLabel.repaint();
+	}
+
+
+
+	@Override
+	public void onDescriptionChanged(Photo photo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void onCommentAdded(Photo photo) {
+		// TODO Auto-generated method stub
+		
+	}
+    
 }

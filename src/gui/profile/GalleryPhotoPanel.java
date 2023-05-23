@@ -2,6 +2,7 @@ package gui.profile;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,9 +12,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import auth.Authentication;
 import gui.home.PhotoPanel;
-import listeners.GalleryActionListener;
 import models.Photo;
+import models.User;
 
 public class GalleryPhotoPanel extends JPanel {
 	/**
@@ -24,7 +26,7 @@ public class GalleryPhotoPanel extends JPanel {
 	private JButton deleteButton;
 	private JButton shareButton;
 	private Photo photo;
-	private GalleryActionListener galleryActionListener;
+
 
 	/**
 	 * Constructs a new DiscoveryPhotoPanel object.
@@ -34,10 +36,15 @@ public class GalleryPhotoPanel extends JPanel {
 	 */
 	public GalleryPhotoPanel(Photo photo) throws IOException {
 		this.photo = photo;
+		 setPreferredSize(new Dimension(300, 300));
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 		createComponents();
 		addComponents();
+	}
+
+	public PhotoPanel getPhotoPanel() {
+		return photoPanel;
 	}
 
 	/**
@@ -118,30 +125,22 @@ public class GalleryPhotoPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 
 				boolean success = false;
+				User u=Authentication.getInstance().getCurrentUser();
+		        System.out.println(u);
 				try {
-					photo.delete();
+					//photo.delete();
+					u.removePhoto(photo);
 					success = true;
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				if (success) {
-					galleryActionListener.delete(photo);
-				}
+
 			}
 
 		});
 
 	}
 
-	public void setGalleryActionListener(GalleryActionListener listener) {
-		this.galleryActionListener = listener;
-	}
-
-	/**
-	 * Sets the owner nickname for the photo.
-	 * 
-	 * @param nickname the owner nickname
-	 */
 
 }

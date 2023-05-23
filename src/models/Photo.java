@@ -3,11 +3,11 @@ package models;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageFilter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -24,7 +25,10 @@ import javax.imageio.ImageIO;
 
 import exceptions.UserAlreadyLikedPhotoException;
 import exceptions.UserDidNotLikePhotoException;
+import listeners.PhotoListener;
 import services.ImageMatrix;
+import services.ImageSecretary;
+import utils.PhotoFilter;
 //TODO:add logger
 
 public class Photo implements Serializable {
@@ -35,15 +39,15 @@ public class Photo implements Serializable {
 	public static final String DATA_FILE = "imageData.txt";
 	private User owner;
 	private String fileName;
-	private List<ImageFilter> appliedFilters;
+	private List<PhotoFilter> appliedFilters;
 	private List<Comment> comments;
 	private List<User> likes;
 	private String description;
 	private boolean isPublic;
-	private transient ImageMatrix imageMatrix;
 	private String extension;
-
-	private static int id = 0;
+	private transient List<PhotoListener> listeners;
+	
+	private static int initialId = 0;
 
 	protected Photo(User owner, String fileName, String extension) {
 		this.owner = owner;
@@ -52,7 +56,22 @@ public class Photo implements Serializable {
 		this.likes = new ArrayList<User>();
 		this.extension = extension;
 		this.fileName = fileName;
+		listeners=new ArrayList<>();
 	}
+	
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        listeners = new ArrayList<>(); // Initialize the listeners field during deserialization
+    }
+	
+	public void addListener(PhotoListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(PhotoListener listener) {
+        listeners.remove(listener);
+    }
+
 	
 	/**
 	 * Creates a new photo.
@@ -114,7 +133,7 @@ public class Photo implements Serializable {
 		File imagesDirectory = new File("data/" + user.getNickname() + "/images/");
 		File[] photoDirectories = imagesDirectory.listFiles();
 		if (photoDirectories == null) {
-			return user.getNickname() + id;
+			return user.getNickname() + initialId;
 		}
 
 		// Regular expression pattern to extract the id part from the filename
@@ -143,11 +162,11 @@ public class Photo implements Serializable {
 	}
 
 	public static String getNextPhotoName(User owner) {
-		return owner.getNickname() + id;
+		return owner.getNickname() + initialId;
 	}
 
 	public static String getNextPhotoName(User owner, String extension) {
-		return owner.getNickname() + id + extension;
+		return owner.getNickname() + initialId + extension;
 	}
 
 	private void save() throws IOException, FileNotFoundException {
@@ -156,6 +175,10 @@ public class Photo implements Serializable {
 		oos.writeObject(this);
 		oos.close();
 		fos.close();
+	}
+	
+	public void update(BufferedImage image) throws IOException {
+		ImageSecretary.writeImageToResources(image, getImageFile().getPath(),extension);
 	}
 
 	public File getDataFile() {
@@ -174,9 +197,14 @@ public class Photo implements Serializable {
         if (!folder.exists()) {
             throw new IOException("Folder does not exist: " + filePath);
         }
-        
+        System.out.println(owner);
+        //owner.removePhoto(this);
         deleteFolder(folder);
-        owner.removePhoto(this);
+	    // Create a copy of the listeners list
+	    List<PhotoListener> listenersCopy = new ArrayList<>(listeners);
+        for (PhotoListener listener : listenersCopy) {
+        	listener.onDeleted(this);
+        }
     }
 
     private void deleteFolder(File folder) throws IOException {
@@ -197,6 +225,20 @@ public class Photo implements Serializable {
         if (!folder.delete()) {
             throw new IOException("Failed to delete folder: " + folder.getAbsolutePath());
         }
+    }
+    
+    public void addComment(Comment comment) {
+    	try {
+    		comments.add(comment);
+    		save();
+		    // Create a copy of the listeners list
+		    List<PhotoListener> listenersCopy = new ArrayList<>(listeners);
+            for (PhotoListener listener : listenersCopy) {
+            	listener.onCommentAdded(this);
+            }
+    	}catch(Exception e) {
+    		comments.remove(comment);
+    	}
     }
 
     
@@ -235,6 +277,14 @@ public class Photo implements Serializable {
 		try {
 			this.description = description;
 			save();
+		    // Create a copy of the listeners list
+		    List<PhotoListener> listenersCopy = new ArrayList<>(listeners);
+
+		    // Iterate over the copy of the listeners list
+		    for (PhotoListener listener : listenersCopy) {
+		        listener.onDescriptionChanged(this);
+		    }
+
 		}catch(Exception e) {
 			this.description = old;
 			throw e;
@@ -303,21 +353,36 @@ public class Photo implements Serializable {
 		}
 	}
 
-	public List<ImageFilter> getAppliedFilters() {
+	public List<PhotoFilter> getAppliedFilters() {
 		return appliedFilters;
 	}
 
-	public void addFilter(ImageFilter filter) {
-		// TODO: manipulate imageMatrix
-		appliedFilters.add(filter);
+	public void addFilter(PhotoFilter filter, BufferedImage filteredImage) throws Exception {
+		try {
+			appliedFilters.add(filter);
+			update(filteredImage);
+			save();
+		    // Create a copy of the listeners list
+		    List<PhotoListener> listenersCopy = new ArrayList<>(listeners);
+	        for (PhotoListener listener : listenersCopy) {
+	        	listener.onFilterApplied(this);
+	        }
+		}catch(Exception e) {
+			appliedFilters.remove(filter);
+			throw e;
+		}
 	}
 
+	/*
 	public void setImageMatrix(ImageMatrix matrix) {
 		this.imageMatrix = matrix;
 	}
+	*/
 
-	public ImageMatrix getImageMatrix() {
-		return imageMatrix;
+	public ImageMatrix getImageMatrix() throws IOException {
+
+		return new ImageMatrix(ImageIO.read(getImageFile()));
+
 	}
 
 
@@ -337,7 +402,6 @@ public class Photo implements Serializable {
 	}
 
 	public void like(User user) throws IOException, FileNotFoundException, UserAlreadyLikedPhotoException{
-
 		if (likes.contains(user)) {
 			throw new UserAlreadyLikedPhotoException();
 		} else {
@@ -374,7 +438,7 @@ public class Photo implements Serializable {
 	        return false;
 	    }
 	    Photo otherPhoto = (Photo) obj;
-	    return Objects.equals(fileName, otherPhoto.fileName);
+	    return Objects.equals(fileName, otherPhoto.getFileName());
 	}
 
 	@Override

@@ -40,9 +40,6 @@ public class ImageSecretary {
 	 * @param extension of the file
 	 * @return
 	 */
-	public static boolean writeFilteredImageToResources(ImageMatrix image, String imagePath) {
-		return writeImageToResources(image.getBufferedImage(), imagePath);
-	}
 
 	public static List<String> getRawImageNames(String dirPath) {
 		List<String> res = new ArrayList<>();
@@ -63,7 +60,7 @@ public class ImageSecretary {
 	 * @param name
 	 * @return
 	 */
-	private static boolean writeImageToResources(RenderedImage image, String imagePath) {
+	public static boolean writeImageToResources(RenderedImage image, String imagePath,String extension) {
 		boolean result = true;
 		try {
 			ImageIO.write(image, "jpg", new File(imagePath));

@@ -30,9 +30,11 @@ public class CommentWindow extends JFrame {
     private JButton commentButton;
     private JScrollPane scrollPane;
     private List<CommentPanel> commentPanels;
+    private Photo photo;
 
     public CommentWindow(Photo photo) {
         commentPanels = new ArrayList<>();
+        this.photo=photo;
         setComments(photo);
 
         commentPanelContainer = new JPanel(new BorderLayout());
@@ -77,7 +79,9 @@ public class CommentWindow extends JFrame {
     private void addComment() {
         String text = commentTextArea.getText();
         if (!text.isEmpty()) {
-        	CommentPanel commentPanel = new CommentPanel(new Comment(Authentication.getInstance().getCurrentUser(),text));
+        	Comment comment=new Comment(Authentication.getInstance().getCurrentUser(),text);
+        	photo.addComment(comment);
+        	CommentPanel commentPanel = new CommentPanel(comment);
             commentPanels.add(commentPanel);
 
             commentPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, commentPanel.getPreferredSize().height));

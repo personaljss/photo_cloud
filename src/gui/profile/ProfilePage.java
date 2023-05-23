@@ -2,17 +2,13 @@ package gui.profile;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -25,17 +21,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import auth.Authentication;
 import gui.home.DiscoveryPage;
 import gui.home.FileChooser;
-import listeners.GalleryActionListener;
+import listeners.PhotoListener;
 import models.Photo;
 import models.User;
 
 /**
  * Represents the profile page of a user.
  */
-public class ProfilePage extends JFrame implements GalleryActionListener{
+public class ProfilePage extends JFrame implements PhotoListener{
 
     private static final long serialVersionUID = 8018934881827210300L;
     private User user;
@@ -62,7 +57,7 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
     private void initialize() {
         setTitle("Profile Page");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(950, 700));
+        setMinimumSize(new Dimension(1200, 800));
         setLocationRelativeTo(null); // center the frame
         setBounds(100, 100, 800, 600);
         getContentPane().setLayout(new BorderLayout());
@@ -78,12 +73,9 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
 
         // Create the profile photo panel
         ProfilePhotoPanel profilePhotoPanel = null;
-		try {
-			profilePhotoPanel = new ProfilePhotoPanel(resizeImage(loadProfileImage(), 150, 150), 150);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
+		profilePhotoPanel = new ProfilePhotoPanel(user, 150);
+
         leftPanel.add(profilePhotoPanel, BorderLayout.NORTH);
 
         // Create the user information panel
@@ -132,11 +124,6 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
     }
 
 
-	private BufferedImage loadProfileImage() throws IOException {
-		// TODO Auto-generated method stub
-		return ImageIO.read(user.getProfilePhoto());
-	}
-
 	/**
      * Creates the menu bar and adds menu items.
      */
@@ -180,9 +167,11 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
     /**
      * Creates the right panel of the profile page.
      */
+
     private void createRightPanel() {
-        rightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Use FlowLayout instead of GridLayout
+        rightPanel = new JPanel(new GridLayout(0, 3, 10, 10)); // Use GridLayout with 3 columns
         JScrollPane scrollPane = new JScrollPane(rightPanel);
+        rightPanel.setPreferredSize(new Dimension(930, getHeight()));
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -190,26 +179,51 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
 
         getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
+    
 
     /**
      * Displays the images in the right panel.
      */
-    private void displayImages() {
+
+    public void displayImages() {
         rightPanel.removeAll(); // Clear existing images
 
         for (Photo photo : user.getAlbum()) {
+        	photo.addListener(this);
             try {
-            	GalleryPhotoPanel panel=new GalleryPhotoPanel(photo);
-            	panel.setGalleryActionListener(this);
+                GalleryPhotoPanel panel = new GalleryPhotoPanel(photo);
+                //panel.setGalleryActionListener(this);
                 rightPanel.add(panel);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        // Add invisible boxes if there are less than 4 images
+        int numImages = user.getAlbum().size();
+        if (numImages < 4) {
+            for (int i = 0; i < (4 - numImages); i++) {
+                rightPanel.add(createInvisibleBox());
+            }
+        }
+
         rightPanel.revalidate();
         rightPanel.repaint();
     }
+
+    /**
+     * Creates an invisible box with the same size as the gallery photo panel.
+     * The invisible box is used to maintain a consistent layout with empty slots.
+     *
+     * @return the invisible box panel
+     */
+    private JPanel createInvisibleBox() {
+        JPanel invisibleBox = new JPanel();
+        invisibleBox.setPreferredSize(new Dimension(300, 200)); // Set the desired size
+        invisibleBox.setOpaque(false); // Make the panel transparent
+        return invisibleBox;
+    }
+
 
 
     /**
@@ -221,30 +235,16 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             try {
                 Photo.create(user, fileChooser.getSelectedFile());
-                displayImages();
+                displayImages(); // Update the gallery display
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
                 e.printStackTrace();
             } catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+                e.printStackTrace();
+            }
         }
     }
 
-	@Override
-	public void delete(Photo photo) {
-		// TODO Auto-generated method stub
-		displayImages();
-	}
-
-	private BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
-	    BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-	    Graphics2D g2d = resizedImage.createGraphics();
-	    g2d.drawImage(originalImage, 0, 0, width, height, null);
-	    g2d.dispose();
-	    return resizedImage;
-	}
 
 	public void updateUser() {
 	    // Remove the old leftPanel from the frame
@@ -259,5 +259,36 @@ public class ProfilePage extends JFrame implements GalleryActionListener{
 	    revalidate(); // Revalidate the frame to reflect the changes
 	}
 
+	@Override
+	public void onDeleted(Photo photo) {
+		// TODO Auto-generated method stub
+		displayImages();
+	}
+
+	@Override
+	public void onFilterApplied(Photo photo) {
+		// TODO Auto-generated method stub
+		displayImages();
+	}
+
+	@Override
+	public void onDescriptionChanged(Photo photo) {
+		// TODO Auto-generated method stub
+		displayImages();
+	}
+
+	@Override
+	public void onCommentAdded(Photo photo) {
+		// TODO Auto-generated method stub
+		displayImages();
+	}
+
+	@Override
+	public void dispose() {
+		for(Photo photo : user.getAlbum()) {
+			photo.removeListener(this);
+		}
+		super.dispose();
+	}
 
 }

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class DiscoveryPage extends JFrame {
         photos = AppState.getInstance().getDiscoveryContent();
         setTitle("Discovery");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(950, 700));
+        setMinimumSize(new Dimension(1200, 800));
         setLocationRelativeTo(null); // center the frame
     }
 
@@ -130,20 +131,17 @@ public class DiscoveryPage extends JFrame {
      * @param mainPanel the main panel to which the photo grid panel will be added.
      */
     private void createRightPanel() {
-        photoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Use FlowLayout instead of GridLayout
+        photoPanel = new JPanel(new GridLayout(0, 3, 10, 10)); // Use GridLayout with 3 columns
         JScrollPane scrollPane = new JScrollPane(photoPanel);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         addPhotosToGrid();
+        addInvisibleBoxes();
 
         getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
 
-
-    /**
-     * Adds the photos to the photo grid panel.
-     */
     private void addPhotosToGrid() {
         for (Photo photo : photos) {
             try {
@@ -154,7 +152,23 @@ public class DiscoveryPage extends JFrame {
                 e.printStackTrace();
             }
         }
+    }
+    
+    private void addInvisibleBoxes() {
+        int numPhotos = photos.size();
+        int remainingSlots = 4 - (numPhotos % 4); // Calculate the number of remaining slots for invisible boxes
         
+        for (int i = 0; i < remainingSlots; i++) {
+            JPanel invisibleBox = createInvisibleBox();
+            this.photoPanel.add(invisibleBox);
+        }
+    }
+
+    private JPanel createInvisibleBox() {
+        JPanel invisibleBox = new JPanel();
+        invisibleBox.setPreferredSize(new Dimension(300, 300)); // Set the desired size
+        invisibleBox.setOpaque(false); // Make the panel transparent
+        return invisibleBox;
     }
 
     /**

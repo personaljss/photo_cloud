@@ -4,44 +4,82 @@ import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
 
-public class BlurFilter implements ImageFilter{
+public class BlurFilter extends PhotoFilter{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7142024283650567724L;
+
+
+
 	/**
      * Applies a Gaussian blur effect to the original image.
      * 
      * @return the blurred image
      */
 	@Override
-	public BufferedImage apply(ImageMatrix imageMatrix) {
-		// TODO Auto-generated method stub
-		// Use a 5x5 Gaussian blur kernel for more blur
-        int[][] kernel = { { 1, 4, 6, 4, 1 }, { 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 },
-                { 1, 4, 6, 4, 1 } };
-        int kernelSum = 256; // Sum of all elements in the kernel
+	public BufferedImage apply(ImageMatrix imageMatrix, int value) {
+	    // Check if the blurValue is within the valid range
+	    if (value < 0 || value > 100) {
+	        throw new IllegalArgumentException("value must be between 0 and 100");
+	    }
 
-        ImageMatrix blurredMatrix = new ImageMatrix(imageMatrix.getWidth(), imageMatrix.getHeight());
+	    // Calculate the kernel size based on the blur value
+	    int kernelSize = (int) (value * 0.05);
 
-        // Apply the blur kernel to each pixel in the image
-        for (int i = 2; i < imageMatrix.getWidth() - 2; i++) {
-            for (int j = 2; j < imageMatrix.getHeight() - 2; j++) {
-                int red = 0, green = 0, blue = 0;
+	    // Ensure the kernel size is odd
+	    if (kernelSize % 2 == 0) {
+	        kernelSize++; // Make it odd by incrementing
+	    }
 
-                for (int ki = -2; ki <= 2; ki++) {
-                    for (int kj = -2; kj <= 2; kj++) {
-                        red += kernel[ki + 2][kj + 2] * imageMatrix.getRed(i + ki, j + kj);
-                        green += kernel[ki + 2][kj + 2] * imageMatrix.getGreen(i + ki, j + kj);
-                        blue += kernel[ki + 2][kj + 2] * imageMatrix.getBlue(i + ki, j + kj);
-                    }
-                }
+	    // Calculate the kernel radius
+	    int kernelRadius = kernelSize / 2;
 
-                red /= kernelSum;
-                green /= kernelSum;
-                blue /= kernelSum;
+	    ImageMatrix blurredMatrix = new ImageMatrix(imageMatrix.getWidth(), imageMatrix.getHeight());
 
-                blurredMatrix.setRGB(i, j, ImageMatrix.convertRGB(red, green, blue));
-            }
-        }
+	    // Apply the blur kernel to each pixel in the image
+	    for (int i = 0; i < imageMatrix.getWidth(); i++) {
+	        for (int j = 0; j < imageMatrix.getHeight(); j++) {
+	            int red = 0, green = 0, blue = 0;
+	            int count = 0;
 
-        return blurredMatrix.getBufferedImage();
+	            // Apply the blur kernel to the pixels around the current pixel
+	            for (int ki = -kernelRadius; ki <= kernelRadius; ki++) {
+	                for (int kj = -kernelRadius; kj <= kernelRadius; kj++) {
+	                    int x = i + ki;
+	                    int y = j + kj;
+
+	                    // Check if the current pixel is within the image bounds
+	                    if (x >= 0 && x < imageMatrix.getWidth() && y >= 0 && y < imageMatrix.getHeight()) {
+	                        red += imageMatrix.getRed(x, y);
+	                        green += imageMatrix.getGreen(x, y);
+	                        blue += imageMatrix.getBlue(x, y);
+	                        count++;
+	                    }
+	                }
+	            }
+
+	            // Calculate the average RGB values
+	            if (count > 0) {
+	                red /= count;
+	                green /= count;
+	                blue /= count;
+	            }
+
+	            // Set the blurred pixel color
+	            blurredMatrix.setRGB(i, j, ImageMatrix.convertRGB(red, green, blue));
+	        }
+	    }
+
+	    return blurredMatrix.getBufferedImage();
 	}
+
+
+
+	@Override
+	public String toString() {
+		return "Blur Filter";
+	}
+
 
 }

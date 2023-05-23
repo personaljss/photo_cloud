@@ -1,24 +1,89 @@
 package gui.profile;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import auth.Authentication;
+import gui.home.FileChooser;
+import models.Photo;
+import models.User;
+import services.ImageMatrix;
+import utils.BlurFilter;
 
 public class ProfilePhotoPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
     private BufferedImage profileImage;
+    private BufferedImage originalImage;
     private int size;
+    private boolean isHovered;
+    private User user;
 
-    public ProfilePhotoPanel(BufferedImage profileImage, int size) {
-        this.profileImage = profileImage;
+    private static final int TEXT_SIZE = 14;
+    private static final Color TEXT_COLOR = Color.WHITE;
+    private static final String CHANGE_TEXT = "Change";
+
+    public ProfilePhotoPanel(User user, int size) {
+        this.user=Authentication.getInstance().getCurrentUser();
+        try {
+			this.profileImage = loadProfileImage();
+			originalImage=profileImage;
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        this.originalImage = profileImage;
         this.size = size;
         setPreferredSize(new Dimension(size, size));
+
+        // Add mouse listener
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                isHovered = true;
+                ProfilePhotoPanel.this.profileImage = applyBlurEffect(originalImage);
+                repaint();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                isHovered = false;
+                ProfilePhotoPanel.this.profileImage = originalImage;
+                repaint();
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                uploadPhoto();
+            }
+        });
+    }
+    
+	private BufferedImage loadProfileImage() throws IOException {
+		// TODO Auto-generated method stub
+		return ImageIO.read(user.getProfilePhoto());
+	}
+	
+
+
+    private BufferedImage applyBlurEffect(BufferedImage image) {
+        // Apply blur effect using a predefined blur filter
+        ImageMatrix imageMatrix = new ImageMatrix(image);
+        return new BlurFilter().apply(imageMatrix, 100);
     }
 
     @Override
@@ -28,13 +93,61 @@ public class ProfilePhotoPanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Create a circular clip using a RoundRectangle2D shape
-        RoundRectangle2D clip = new RoundRectangle2D.Float(0, 0, size, size, size, size);
-        g2d.clip(clip);
+        // Create a circular clip shape
+        Ellipse2D clip = new Ellipse2D.Float(0, 0, size, size);
+        g2d.setClip(clip);
 
-        // Draw the profile image within the circular clip
-        g2d.drawImage(profileImage, 0, 0, size, size, null);
+        // Calculate the dimensions for scaling the image to fit the circular shape
+        int scaledWidth = Math.min(profileImage.getWidth(), size);
+        int scaledHeight = Math.min(profileImage.getHeight(), size);
+
+        // Calculate the x and y offsets to center the scaled image within the circular shape
+        int offsetX = (size - scaledWidth) / 2;
+        int offsetY = (size - scaledHeight) / 2;
+
+        // Draw the profile image within the clipped area
+        g2d.drawImage(profileImage, offsetX, offsetY, scaledWidth, scaledHeight, null);
+
+        // Draw hover effect if hovered
+        if (isHovered) {
+            g2d.setColor(new Color(0, 0, 0, 0.5f)); // Semi-transparent black color
+            g2d.setComposite(AlphaComposite.SrcAtop);
+            g2d.fill(clip);
+
+            // Draw the "Change" text on the blurred image
+            g2d.setColor(TEXT_COLOR);
+            g2d.setFont(g2d.getFont().deriveFont(Font.BOLD, TEXT_SIZE));
+            int textWidth = g2d.getFontMetrics().stringWidth(CHANGE_TEXT);
+            int textX = (size - textWidth) / 2;
+            int textY = size / 2;
+            g2d.drawString(CHANGE_TEXT, textX, textY);
+        }
 
         g2d.dispose();
     }
+    
+    /**
+     * Handles the photo upload process.
+     */
+    private void uploadPhoto() {
+        FileChooser fileChooser = new FileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            try {
+                user.updateProfilePhoto(fileChooser.getSelectedFile());
+                profileImage = loadProfileImage(); // Reload the profile photo
+                originalImage = profileImage;
+                revalidate();
+                repaint();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+                e.printStackTrace();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 }

@@ -3,10 +3,8 @@ package gui.home;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -27,14 +25,13 @@ public class PhotoPanel extends JPanel {
 
     private static final long serialVersionUID = 1305911466389510173L;
     private Photo photo;
-    private BufferedImage originalImage;
     private ImageMatrix imageMatrix;
     private JLabel photoLabel;
     private JPanel infoPanel;
     private JLabel descriptionLabel;
 
     private static final int STANDARD_WIDTH = 300;
-    private static final int STANDARD_HEIGHT = 200;
+    private static final int STANDARD_HEIGHT = 300;
     private static final Dimension PANEL_SIZE = new Dimension(STANDARD_WIDTH, STANDARD_HEIGHT);
 
     public PhotoPanel(Photo photo) throws IOException {
@@ -73,7 +70,7 @@ public class PhotoPanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 // Blur the image
-                BufferedImage blurredImage = new BlurFilter().apply(imageMatrix);
+                BufferedImage blurredImage = new BlurFilter().apply(imageMatrix,100);
                 photoLabel.setIcon(new ImageIcon(blurredImage));
 
                 // Show info panel
@@ -100,13 +97,38 @@ public class PhotoPanel extends JPanel {
         });
 
     }
+    
+    
 
-    public void setDescription(String txt) {
+    public Photo getPhoto() {
+		return photo;
+	}
+
+
+
+	public void setDescription(String txt) {
         descriptionLabel.setText(txt);
         descriptionLabel.revalidate();
         descriptionLabel.repaint();
     }
+/*
+    public void update() {
+        BufferedImage resizedImage;
+		try {
+			resizedImage = photo.getResizedImage(STANDARD_WIDTH, STANDARD_HEIGHT);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+        imageMatrix = new ImageMatrix(resizedImage);
 
-  
+        // Prepare photo label
+        photoLabel = new JLabel(new ImageIcon(resizedImage), SwingConstants.CENTER);
+        add(photoLabel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+    */
  
 }

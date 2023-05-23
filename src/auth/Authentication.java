@@ -84,11 +84,11 @@ public class Authentication {
 	        User user = User.create(nickName, password, realName, surname, age, emailAddress, type);
 	        appState.addUser(user);
 	        result = new AuthResult(true, "Signed up successfully");
+		    Logger.logInfo("User " + nickName + " created.");
 	    } catch (IOException e) {
 	        result = new AuthResult(false, "A problem occurred.");
 	        Logger.logError(e.getMessage());
 	    }
-	    Logger.logInfo("User " + nickName + " created.");
 	    return result;
 	}
 

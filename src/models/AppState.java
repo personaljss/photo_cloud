@@ -22,6 +22,7 @@ public class AppState {
 	private AppState() {
 		users = new HashMap<>();
 		readAllData();
+	
 	}
 
 	public List<Photo> getDiscoveryContent() {
