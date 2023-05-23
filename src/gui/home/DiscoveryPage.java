@@ -99,6 +99,7 @@ public class DiscoveryPage extends JFrame {
      */
 
     private void createLeftPanel() {
+    	/*
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setPreferredSize(new Dimension(200, getHeight()));
@@ -120,7 +121,13 @@ public class DiscoveryPage extends JFrame {
 
         // Add search panel to the left panel
         leftPanel.add(searchPanel);
-
+        */
+    	JPanel leftPanel=new SearchPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        /*
+        leftPanel.setPreferredSize(new Dimension(200, getHeight()));
+        leftPanel.setMaximumSize(new Dimension(200, getHeight()));
+        */
         // Add left panel to the main panel
         getContentPane().add(leftPanel, BorderLayout.WEST);
     }

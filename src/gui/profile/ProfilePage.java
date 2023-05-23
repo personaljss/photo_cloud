@@ -259,6 +259,7 @@ public class ProfilePage extends JFrame implements PhotoListener{
 	    revalidate(); // Revalidate the frame to reflect the changes
 	}
 
+	//TODO: write separate methods
 	@Override
 	public void onDeleted(Photo photo) {
 		// TODO Auto-generated method stub
