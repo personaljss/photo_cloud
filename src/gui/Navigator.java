@@ -77,8 +77,13 @@ public class Navigator {
         JFrame frame = null;
         switch (frameName) {
             case AUTH_FRAME:
-                frame=new AuthFrame();
-                break;
+            	frame = new AuthFrame();
+            	frame.setMinimumSize(new Dimension(500, 700));
+            	frame.pack(); // Adjusts the frame size based on the components
+            	frame.setLocationRelativeTo(null); // Centers the frame on the screen
+            	frame.setVisible(true);
+                return frame;
+                //break;
             case PROFILE_PAGE:
                 frame = new ProfilePage();
                 break;
@@ -94,7 +99,7 @@ public class Navigator {
         if (frame != null) {
             Dimension previousSize = null;
             Rectangle previousBounds = null;
-            if (currentFrame != null) {
+            if (currentFrame != null && !(currentFrame instanceof AuthFrame)) {
                 previousSize = currentFrame.getSize();
                 previousBounds = currentFrame.getBounds();
             }

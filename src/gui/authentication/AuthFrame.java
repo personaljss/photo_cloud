@@ -17,7 +17,7 @@ public class AuthFrame extends JFrame {
         loginForm = new LoginForm(this);
 
         setContentPane(loginForm);
-        setSize(600, 300);
+        //setSize(600, 300);
         setVisible(true);
         // Configure the frame
 
