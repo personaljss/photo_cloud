@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 
 import auth.AuthResult;
 import auth.Authentication;
+import gui.Navigator;
 import gui.profile.ProfilePage;
 
 public class LoginForm extends JPanel {
@@ -82,11 +83,12 @@ public class LoginForm extends JPanel {
 	*/
 	
 	private void goToHomeFrame() {
-	    ProfilePage profilePage = new ProfilePage(Authentication.getInstance().getCurrentUser());
-	    //mainFrame.getContentPane().add(profilePage);
-
 	    
-	    authFrame.dispose();
+		//ProfilePage profilePage = new ProfilePage();
+	    //mainFrame.getContentPane().add(profilePage);
+		Navigator.getInstance().navigateTo(Navigator.PROFILE_PAGE);
+	    
+	    //authFrame.dispose();
 	}
 
 }
