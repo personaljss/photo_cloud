@@ -2,14 +2,17 @@ package gui.profile;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,6 +24,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import auth.Authentication;
+import gui.Application;
+import gui.IconButton;
+import gui.TabBarPanel;
 import gui.home.DiscoveryPage;
 import gui.home.FileChooser;
 import listeners.PhotoListener;
@@ -43,12 +50,14 @@ public class ProfilePage extends JFrame implements PhotoListener{
      * 
      * @param user the user associated with the profile page
      */
-    public ProfilePage(User user) {
-        this.user = user;
+    public ProfilePage() {
+        this.user = Authentication.getInstance().getCurrentUser();
         initialize();
+        createTabBarPanel();
         createLeftPanel();
         createRightPanel();
         createMenuBar();
+        //setVisible(true);
     }
 
     /**
@@ -57,70 +66,77 @@ public class ProfilePage extends JFrame implements PhotoListener{
     private void initialize() {
         setTitle("Profile Page");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1200, 800));
+        setMinimumSize(Application.getInstance().getDimension());
         setLocationRelativeTo(null); // center the frame
         setBounds(100, 100, 800, 600);
         getContentPane().setLayout(new BorderLayout());
     }
+    
+    private void createTabBarPanel() {
+        TabBarPanel tabBarPanel = new TabBarPanel(false);
+        getContentPane().add(tabBarPanel, BorderLayout.NORTH);
+    }
+
 
     /**
      * Creates the left panel of the profile page.
      */
+    /**
+     * Creates the left panel of the profile page.
+     */
+   
+     
     private void createLeftPanel() {
-        leftPanel = new JPanel(new BorderLayout());
+        leftPanel = new JPanel(new GridBagLayout());
         leftPanel.setPreferredSize(new Dimension(200, getHeight()));
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Create the profile photo panel
-        ProfilePhotoPanel profilePhotoPanel = null;
-
-		profilePhotoPanel = new ProfilePhotoPanel(user, 150);
-
-        leftPanel.add(profilePhotoPanel, BorderLayout.NORTH);
+        ProfilePhotoPanel profilePhotoPanel = new ProfilePhotoPanel(user, 150);
+        JPanel photoPanelWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        photoPanelWrapper.add(profilePhotoPanel);
 
         // Create the user information panel
-        JPanel userInfoPanel = new JPanel();
-        userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));
-        userInfoPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        JPanel userInfoPanel = new JPanel(new GridBagLayout());
+        userInfoPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        JLabel nicknameLabel = new JLabel("Nickname: " + user.getNickname());
-        userInfoPanel.add(nicknameLabel);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 0, 10, 0);
 
-        JLabel emailLabel = new JLabel("Email: " + user.getEmailAddress());
-        userInfoPanel.add(emailLabel);
+        JLabel nicknameLabel = new JLabel(user.getNickname());
+        userInfoPanel.add(nicknameLabel, gbc);
 
-        JLabel ageLabel = new JLabel("Age: " + user.getAge());
-        userInfoPanel.add(ageLabel);
+        gbc.gridy++;
+        JLabel emailLabel = new JLabel(user.getEmailAddress());
+        userInfoPanel.add(emailLabel, gbc);
 
-        leftPanel.add(userInfoPanel, BorderLayout.CENTER);
+        gbc.gridy++;
+        JLabel ageLabel = new JLabel(user.getAge());
+        userInfoPanel.add(ageLabel, gbc);
 
-        // Create the button panel
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-
-        JButton uploadButton = new JButton("Upload Image");
+        gbc.gridy++;
+        gbc.insets = new Insets(20, 0, 0, 0);
+        IconButton uploadButton = new IconButton(new ImageIcon("resources/upload.png"), 32);
         uploadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 uploadPhoto();
             }
         });
-        buttonPanel.add(uploadButton);
+        userInfoPanel.add(uploadButton, gbc);
 
-        JButton discoveryButton = new JButton("Discovery");
-        discoveryButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new DiscoveryPage();
-                ProfilePage.this.dispose();
-            }
-        });
-        buttonPanel.add(discoveryButton);
+        // Add the components to the left panel
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        leftPanel.add(photoPanelWrapper, gbc);
 
-        leftPanel.add(buttonPanel, BorderLayout.SOUTH);
+        gbc.gridy++;
+        leftPanel.add(userInfoPanel, gbc);
 
         getContentPane().add(leftPanel, BorderLayout.WEST);
-        setVisible(true);
     }
 
 
@@ -167,7 +183,6 @@ public class ProfilePage extends JFrame implements PhotoListener{
     /**
      * Creates the right panel of the profile page.
      */
-
     private void createRightPanel() {
         rightPanel = new JPanel(new GridLayout(0, 3, 10, 10)); // Use GridLayout with 3 columns
         JScrollPane scrollPane = new JScrollPane(rightPanel);
@@ -290,6 +305,12 @@ public class ProfilePage extends JFrame implements PhotoListener{
 			photo.removeListener(this);
 		}
 		super.dispose();
+	}
+
+	@Override
+	public void onVisibilityChanged(Photo photo) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

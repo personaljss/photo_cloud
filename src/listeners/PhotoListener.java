@@ -10,4 +10,6 @@ public interface PhotoListener {
 	void onDescriptionChanged(Photo photo);
 	
 	void onCommentAdded(Photo photo);
+	
+	void onVisibilityChanged(Photo photo);
 }

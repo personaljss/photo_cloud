@@ -23,7 +23,7 @@ public class CommentWindow extends JFrame {
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -342350227170131884L;
+	private static final long serialVersionUID = 4382791163551113422L;
 	private JPanel commentPanelContainer;
     private JPanel commentContentContainer;
     private JTextArea commentTextArea;
@@ -35,7 +35,6 @@ public class CommentWindow extends JFrame {
     public CommentWindow(Photo photo) {
         commentPanels = new ArrayList<>();
         this.photo=photo;
-        setComments(photo);
 
         commentPanelContainer = new JPanel(new BorderLayout());
         commentContentContainer = new JPanel();
@@ -47,7 +46,7 @@ public class CommentWindow extends JFrame {
 
         commentButton = new JButton("Add Comment");
         commentButton.addActionListener(e -> addComment());
-
+        setComments(photo);
         commentPanelContainer.add(commentContentContainer, BorderLayout.CENTER);
 
         scrollPane = new JScrollPane(commentPanelContainer);
@@ -62,7 +61,7 @@ public class CommentWindow extends JFrame {
         getContentPane().add(inputPanel, BorderLayout.SOUTH);
 
         setMinimumSize(new Dimension(500, 400));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Change the default close operation
         setTitle("Comment Window");
         setVisible(true);
     }
@@ -73,6 +72,7 @@ public class CommentWindow extends JFrame {
             commentPanels.add(commentPanel);
             commentPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, commentPanel.getPreferredSize().height));
             commentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            commentContentContainer.add(commentPanel);
     	}
     }
 
@@ -100,14 +100,4 @@ public class CommentWindow extends JFrame {
             });
         }
     }
-/*
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            CommentWindow commentWindow = new CommentWindow();
-            commentWindow.pack();
-            commentWindow.setLocationRelativeTo(null);
-            commentWindow.setVisible(true);
-        });
-    }
-    */
 }

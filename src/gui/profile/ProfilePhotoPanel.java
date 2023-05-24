@@ -1,6 +1,6 @@
 package gui.profile;
 
-import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -14,13 +14,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import auth.Authentication;
 import gui.home.FileChooser;
-import models.Photo;
 import models.User;
 import services.ImageMatrix;
 import utils.BlurFilter;
@@ -38,50 +38,49 @@ public class ProfilePhotoPanel extends JPanel {
     private static final String CHANGE_TEXT = "Change";
 
     public ProfilePhotoPanel(User user, int size) {
-        this.user=Authentication.getInstance().getCurrentUser();
+        this.user = user;
         try {
-			this.profileImage = loadProfileImage();
-			originalImage=profileImage;
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+            this.profileImage = loadProfileImage();
+            originalImage = profileImage;
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         this.originalImage = profileImage;
         this.size = size;
         setPreferredSize(new Dimension(size, size));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        setOpaque(false); // Make the panel transparent
 
-        // Add mouse listener
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                isHovered = true;
-                ProfilePhotoPanel.this.profileImage = applyBlurEffect(originalImage);
-                repaint();
-            }
+        if (user.equals(Authentication.getInstance().getCurrentUser())) {
+            // Add mouse listener
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    isHovered = true;
+                    ProfilePhotoPanel.this.profileImage = applyBlurEffect(originalImage);
+                    repaint();
+                }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                isHovered = false;
-                ProfilePhotoPanel.this.profileImage = originalImage;
-                repaint();
-            }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    isHovered = false;
+                    ProfilePhotoPanel.this.profileImage = originalImage;
+                    repaint();
+                }
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                uploadPhoto();
-            }
-        });
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    uploadPhoto();
+                }
+            });
+        }
     }
-    
-	private BufferedImage loadProfileImage() throws IOException {
-		// TODO Auto-generated method stub
-		return ImageIO.read(user.getProfilePhoto());
-	}
-	
 
+    private BufferedImage loadProfileImage() throws IOException {
+        return ImageIO.read(user.getProfilePhoto());
+    }
 
     private BufferedImage applyBlurEffect(BufferedImage image) {
-        // Apply blur effect using a predefined blur filter
         ImageMatrix imageMatrix = new ImageMatrix(image);
         return new BlurFilter().apply(imageMatrix, 100);
     }
@@ -94,25 +93,21 @@ public class ProfilePhotoPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Create a circular clip shape
-        Ellipse2D clip = new Ellipse2D.Float(0, 0, size, size);
+        Ellipse2D clip = new Ellipse2D.Float(0, 0, size - 1, size - 1); // Subtract 1 from size for thicker border
         g2d.setClip(clip);
 
-        // Calculate the dimensions for scaling the image to fit the circular shape
-        int scaledWidth = Math.min(profileImage.getWidth(), size);
-        int scaledHeight = Math.min(profileImage.getHeight(), size);
-
-        // Calculate the x and y offsets to center the scaled image within the circular shape
-        int offsetX = (size - scaledWidth) / 2;
-        int offsetY = (size - scaledHeight) / 2;
-
         // Draw the profile image within the clipped area
-        g2d.drawImage(profileImage, offsetX, offsetY, scaledWidth, scaledHeight, null);
+        g2d.drawImage(profileImage, 0, 0, size, size, null);
+
+        // Draw border
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(6)); // Set border thickness
+        g2d.drawOval(0, 0, size - 1, size - 1); // Subtract 1 from size for thicker border
 
         // Draw hover effect if hovered
         if (isHovered) {
-            g2d.setColor(new Color(0, 0, 0, 0.5f)); // Semi-transparent black color
-            g2d.setComposite(AlphaComposite.SrcAtop);
-            g2d.fill(clip);
+            g2d.setColor(new Color(0, 0, 0, 0.5f));
+            g2d.fillOval(0, 0, size - 1, size - 1); // Subtract 1 from size for thicker border
 
             // Draw the "Change" text on the blurred image
             g2d.setColor(TEXT_COLOR);
@@ -125,17 +120,14 @@ public class ProfilePhotoPanel extends JPanel {
 
         g2d.dispose();
     }
-    
-    /**
-     * Handles the photo upload process.
-     */
+
     private void uploadPhoto() {
         FileChooser fileChooser = new FileChooser();
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             try {
                 user.updateProfilePhoto(fileChooser.getSelectedFile());
-                profileImage = loadProfileImage(); // Reload the profile photo
+                profileImage = loadProfileImage();
                 originalImage = profileImage;
                 revalidate();
                 repaint();
@@ -148,6 +140,4 @@ public class ProfilePhotoPanel extends JPanel {
             }
         }
     }
-
-
 }

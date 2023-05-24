@@ -74,21 +74,11 @@ public class LoginForm extends JPanel {
 		});
 	}
 	
-	/*
-	private void goToHomeFrame() {
-		//new HomeFrame();
-		new MainFrame();
-		authFrame.dispose();
-	}
-	*/
 	
 	private void goToHomeFrame() {
-	    
-		//ProfilePage profilePage = new ProfilePage();
-	    //mainFrame.getContentPane().add(profilePage);
+
 		Navigator.getInstance().navigateTo(Navigator.PROFILE_PAGE);
-	    
-	    //authFrame.dispose();
+
 	}
 
 }

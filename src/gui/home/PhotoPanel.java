@@ -9,17 +9,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import auth.Authentication;
 import gui.profile.PhotoEditingFrame;
 import models.Photo;
 import services.ImageMatrix;
 import utils.BlurFilter;
+import utils.PhotoFilter;
 
 public class PhotoPanel extends JPanel {
 
@@ -29,12 +30,13 @@ public class PhotoPanel extends JPanel {
     private JLabel photoLabel;
     private JPanel infoPanel;
     private JLabel descriptionLabel;
+    private JLabel filtersLabel;
 
     private static final int STANDARD_WIDTH = 300;
     private static final int STANDARD_HEIGHT = 300;
     private static final Dimension PANEL_SIZE = new Dimension(STANDARD_WIDTH, STANDARD_HEIGHT);
 
-    public PhotoPanel(Photo photo) throws IOException {
+    public PhotoPanel(Photo photo, boolean isSelf) throws IOException {
         this.photo = photo;
         setLayout(new BorderLayout());
         setPreferredSize(PANEL_SIZE);
@@ -60,6 +62,10 @@ public class PhotoPanel extends JPanel {
         descriptionLabel = new JLabel(photo.getDescription());
         descriptionLabel.setForeground(Color.WHITE);
         infoPanel.add(descriptionLabel, gbc);
+
+        filtersLabel = new JLabel(getAppliedFiltersText(photo.getAppliedFilters()));
+        filtersLabel.setForeground(Color.WHITE);
+        infoPanel.add(filtersLabel, gbc);
 
         // Add info panel to photo label
         photoLabel.setLayout(new GridBagLayout());
@@ -88,9 +94,10 @@ public class PhotoPanel extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.print("clicked");
-                if (Authentication.getInstance().getCurrentUser().equals(photo.getOwner())) {
+                if (isSelf) {
                     new PhotoEditingFrame(photo);
+                }else {
+                	new PhotoDetailsPage(photo);
                 }
             }
 
@@ -98,37 +105,30 @@ public class PhotoPanel extends JPanel {
 
     }
     
+    private String getAppliedFiltersText(List<PhotoFilter> appliedFilters) {
+        StringBuilder sb = new StringBuilder("Applied Filters: ");
+        if(appliedFilters.size()==0) {
+        	sb.append("none");
+        	return sb.toString();
+        }
+        for (PhotoFilter filter : appliedFilters) {
+            sb.append(filter.toString()).append(", ");
+        }
+        // Remove the trailing comma and space
+        if (sb.length() > 2) {
+            sb.setLength(sb.length() - 2);
+        }
+        return sb.toString();
+    }
     
-
     public Photo getPhoto() {
-		return photo;
-	}
-
-
-
-	public void setDescription(String txt) {
+        return photo;
+    }
+    /*
+    public void setDescription(String txt) {
         descriptionLabel.setText(txt);
         descriptionLabel.revalidate();
         descriptionLabel.repaint();
     }
-/*
-    public void update() {
-        BufferedImage resizedImage;
-		try {
-			resizedImage = photo.getResizedImage(STANDARD_WIDTH, STANDARD_HEIGHT);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-        imageMatrix = new ImageMatrix(resizedImage);
-
-        // Prepare photo label
-        photoLabel = new JLabel(new ImageIcon(resizedImage), SwingConstants.CENTER);
-        add(photoLabel, BorderLayout.CENTER);
-        revalidate();
-        repaint();
-    }
     */
- 
 }

@@ -18,12 +18,20 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import auth.Authentication;
 import listeners.PhotoListener;
+import models.FreeUser;
+import models.HobbyistUser;
 import models.Photo;
+import models.ProfessionalUser;
+import models.User;
 import utils.BlurFilter;
 import utils.BrightnessFilter;
+import utils.ContrastFilter;
 import utils.EdgeDetectionFilter;
 import utils.GrayscaleFilter;
+import utils.PhotoFilter;
 import utils.SharpenFilter;
 
 
@@ -103,7 +111,8 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply blur filter to the photo
-            	new FilterDialog(PhotoEditingFrame.this,photo, new BlurFilter());
+            	checkType(new BlurFilter());
+            	//new FilterDialog(PhotoEditingFrame.this,photo, new BlurFilter());
             }
         });
         filterMenu.add(blurMenuItem);
@@ -113,7 +122,8 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply detect edges filter to the photo
-            	new FilterDialog(PhotoEditingFrame.this,photo, new EdgeDetectionFilter());
+            	//new FilterDialog(PhotoEditingFrame.this,photo, new EdgeDetectionFilter());
+            	checkType(new EdgeDetectionFilter());
             }
         });
         filterMenu.add(detectEdgesMenuItem);
@@ -123,7 +133,8 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply detect edges filter to the photo
-            	new FilterDialog(PhotoEditingFrame.this,photo, new SharpenFilter());
+            	//new FilterDialog(PhotoEditingFrame.this,photo, new SharpenFilter());
+            	checkType(new SharpenFilter());
             }
         });
         filterMenu.add(sharpenMenuItem);
@@ -133,7 +144,8 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply detect edges filter to the photo
-            	new FilterDialog(PhotoEditingFrame.this,photo, new BrightnessFilter());
+            	//new FilterDialog(PhotoEditingFrame.this,photo, new BrightnessFilter());
+            	checkType(new BrightnessFilter());
             }
         });
         filterMenu.add(brightnessMenuItem);
@@ -143,7 +155,8 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Apply detect edges filter to the photo
-            	new FilterDialog(PhotoEditingFrame.this,photo, new GrayscaleFilter());
+            	//new FilterDialog(PhotoEditingFrame.this,photo, new GrayscaleFilter());
+            	checkType(new GrayscaleFilter());
             }
         });
         filterMenu.add(grayScaleMenuItem);
@@ -206,6 +219,32 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
 
         return menuBar;
     }
+    
+    private void checkType(PhotoFilter filter) {
+        User currentUser = Authentication.getInstance().getCurrentUser();
+
+        if (currentUser instanceof FreeUser) {
+            if (filter instanceof BlurFilter || filter instanceof SharpenFilter) {
+                // Open the filter dialog for the selected filter
+                new FilterDialog(PhotoEditingFrame.this, photo, filter);
+            } else {
+                JOptionPane.showMessageDialog(this, "Free tier users can only apply blur and sharpen filters.", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        } else if (currentUser instanceof HobbyistUser) {
+            if (filter instanceof BlurFilter || filter instanceof SharpenFilter || filter instanceof BrightnessFilter) {
+                // Open the filter dialog for the selected filter
+                new FilterDialog(PhotoEditingFrame.this, photo, filter);
+            } else {
+                JOptionPane.showMessageDialog(this, "Hobbyist tier users can apply blur, sharpen, brightness, and contrast filters.", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        } else if (currentUser instanceof ProfessionalUser) {
+            // All filters can be applied by professional tier users
+            // Open the filter dialog for the selected filter
+            new FilterDialog(PhotoEditingFrame.this, photo, filter);
+        }
+    }
+
+
 
     @Override 
     public void dispose() {
@@ -242,6 +281,14 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
 
 	@Override
 	public void onCommentAdded(Photo photo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void onVisibilityChanged(Photo photo) {
 		// TODO Auto-generated method stub
 		
 	}

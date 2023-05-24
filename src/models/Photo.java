@@ -394,7 +394,15 @@ public class Photo implements Serializable {
 		boolean old=this.isPublic;
 		try {
 			this.isPublic = isPublic;
-			save();			
+			save();	
+		    // Create a copy of the listeners list
+		    List<PhotoListener> listenersCopy = new ArrayList<>(listeners);
+
+		    // Iterate over the copy of the listeners list
+		    for (PhotoListener listener : listenersCopy) {
+		        listener.onVisibilityChanged(this);
+		    }
+
 		}catch(Exception e) {
 			this.isPublic=old;
 			throw e;

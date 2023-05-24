@@ -1,5 +1,4 @@
 package gui.home;
-
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -18,13 +17,15 @@ import javax.swing.JPanel;
 import auth.Authentication;
 import exceptions.UserAlreadyLikedPhotoException;
 import exceptions.UserDidNotLikePhotoException;
+import gui.Navigator;
+import listeners.PhotoListener;
 import models.Photo;
 import models.User;
 
 /**
  * Represents a photo panel in the discovery page.
  */
-public class DiscoveryPhotoPanel extends JPanel {
+public class DiscoveryPhotoPanel extends JPanel implements PhotoListener{
 
     private static final long serialVersionUID = 3245079321754429824L;
     private PhotoPanel photoPanel;
@@ -36,13 +37,14 @@ public class DiscoveryPhotoPanel extends JPanel {
 
     /**
      * Constructs a new DiscoveryPhotoPanel object.
-     * 
+     *
      * @param photo the photo to display in the panel
      * @throws IOException if an error occurs while reading the image
      */
     public DiscoveryPhotoPanel(Photo photo) throws IOException {
         this.photo = photo;
-        this.user=Authentication.getInstance().getCurrentUser();
+        photo.addListener(this);
+        this.user = Authentication.getInstance().getCurrentUser();
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         createComponents();
@@ -54,7 +56,7 @@ public class DiscoveryPhotoPanel extends JPanel {
      */
     private void createComponents() {
         try {
-            photoPanel = new PhotoPanel(photo);
+            photoPanel = new PhotoPanel(photo,false);
         } catch (IOException e1) {
             e1.printStackTrace();
             return;
@@ -62,11 +64,10 @@ public class DiscoveryPhotoPanel extends JPanel {
 
         likeButton = new JButton();
         updateLikeButtonIcon(); // Set the initial icon based on the user's like status
-
+        likeButton.setText(Integer.toString(photo.getLikes().size()));
         likeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("clicked");
                 if (!photo.getLikes().contains(user)) {
                     try {
                         photo.like(user);
@@ -94,15 +95,16 @@ public class DiscoveryPhotoPanel extends JPanel {
                 likeButton.repaint();
             }
         });
-        commentButton = new JButton("Comment");
+        commentButton = new JButton();
+        commentButton.setIcon(new ImageIcon("resources/comment.png"));
+        commentButton.setText(Integer.toString(photo.getComments().size()));
         commentButton.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				//
-				new CommentWindow(photo);
-			}
-        	
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CommentWindow(photo);
+            }
+
         });
 
         profileButton = new JButton(photo.getOwner().getNickname());
@@ -110,8 +112,22 @@ public class DiscoveryPhotoPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Navigate to the profile page of the owner
+                Navigator.getInstance().navigateTo(Navigator.OTHERS_PROFILE_PAGE,photo.getOwner());
             }
         });
+
+        // Set button properties
+        likeButton.setOpaque(false);
+        likeButton.setContentAreaFilled(false);
+        likeButton.setBorderPainted(false);
+
+        commentButton.setOpaque(false);
+        commentButton.setContentAreaFilled(false);
+        commentButton.setBorderPainted(false);
+
+        profileButton.setOpaque(false);
+        profileButton.setContentAreaFilled(false);
+        profileButton.setBorderPainted(false);
     }
 
     private void updateLikeButtonIcon() {
@@ -121,7 +137,7 @@ public class DiscoveryPhotoPanel extends JPanel {
             likeButton.setIcon(new ImageIcon("resources/dislikedIcon.png"));
         }
     }
-    
+
     /**
      * Adds the components to the discovery photo panel.
      */
@@ -138,7 +154,6 @@ public class DiscoveryPhotoPanel extends JPanel {
         topPanel.setOpaque(false);
         topPanel.add(profileButton);
         add(topPanel, gbc);
-
         gbc.gridy = 1;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
@@ -151,10 +166,55 @@ public class DiscoveryPhotoPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.PAGE_END;
 
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setOpaque(false);
-        bottomPanel.add(commentButton);
-        bottomPanel.add(likeButton);
+        GridBagConstraints buttonConstraints = new GridBagConstraints();
+        buttonConstraints.insets = new Insets(5, 5, 5, 5);
+        buttonConstraints.anchor = GridBagConstraints.LINE_START;
+        bottomPanel.add(commentButton, buttonConstraints);
+
+        buttonConstraints.anchor = GridBagConstraints.LINE_END;
+        bottomPanel.add(likeButton, buttonConstraints);
+
         add(bottomPanel, gbc);
     }
+    
+    @Override
+    public void removeNotify() {
+        // Remove the listener when the panel is no longer visible
+        photo.removeListener(this);
+
+        super.removeNotify();
+    }
+
+	@Override
+	public void onDeleted(Photo photo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFilterApplied(Photo photo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDescriptionChanged(Photo photo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onCommentAdded(Photo photo) {
+		// TODO Auto-generated method stub
+        commentButton.setText(Integer.toString(photo.getComments().size()));
+        revalidate();
+        repaint();
+	}
+
+	@Override
+	public void onVisibilityChanged(Photo photo) {
+		// TODO Auto-generated method stub
+	}
 }

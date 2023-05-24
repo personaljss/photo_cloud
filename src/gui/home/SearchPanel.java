@@ -31,6 +31,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
+import gui.Navigator;
+import gui.profile.OthersProfilePage;
 import gui.profile.ProfilePage;
 import models.AppState;
 
@@ -124,8 +126,7 @@ import models.AppState;
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					new ProfilePage(state.getUser(element));
+					Navigator.getInstance().navigateTo(Navigator.OTHERS_PROFILE_PAGE,state.getUser(element));
 				}
 				
 			});
