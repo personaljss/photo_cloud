@@ -34,21 +34,23 @@ import utils.GrayscaleFilter;
 import utils.PhotoFilter;
 import utils.SharpenFilter;
 
-
-public class PhotoEditingFrame extends JFrame implements PhotoListener{
-
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -4462951215231814237L;
-	private Photo photo;
+/**
+ * The PhotoEditingFrame class represents a JFrame for editing photos.
+ */
+public class PhotoEditingFrame extends JFrame implements PhotoListener {
+    private static final long serialVersionUID = -4462951215231814237L;
+    private Photo photo;
     private JLabel photoLabel;
 
-
-	public PhotoEditingFrame(Photo photo) {
+    /**
+     * Constructs a PhotoEditingFrame object with the given photo.
+     *
+     * @param photo the photo to edit
+     */
+    public PhotoEditingFrame(Photo photo) {
         this.photo = photo;
         photo.addListener(this);
-        
+
         setTitle("Photo Editing");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -72,24 +74,28 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
         add(centerPanel);
 
         pack();
-        //setLocationRelativeTo(parentFrame);
         setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setVisible(true);
-
-        // Disable the parent frame
-        //parentFrame.setEnabled(false);
     }
 
-
-    
+    /**
+     * Updates the displayed photo with the given image.
+     *
+     * @param image the updated image
+     */
     public void updatePhoto(BufferedImage image) {
-    	photoLabel.setIcon(new ImageIcon(image));
+        photoLabel.setIcon(new ImageIcon(image));
         photoLabel.revalidate();
         photoLabel.repaint();
     }
-    
+
+    /**
+     * Updates the displayed photo with the given photo object.
+     *
+     * @param photo the updated photo
+     */
     public void updatePhoto(Photo photo) {
-    	photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
+        photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
         photoLabel.revalidate();
         photoLabel.repaint();
     }
@@ -110,9 +116,7 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
         blurMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Apply blur filter to the photo
-            	checkType(new BlurFilter());
-            	//new FilterDialog(PhotoEditingFrame.this,photo, new BlurFilter());
+                checkType(new BlurFilter());
             }
         });
         filterMenu.add(blurMenuItem);
@@ -121,9 +125,7 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
         detectEdgesMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Apply detect edges filter to the photo
-            	//new FilterDialog(PhotoEditingFrame.this,photo, new EdgeDetectionFilter());
-            	checkType(new EdgeDetectionFilter());
+                checkType(new EdgeDetectionFilter());
             }
         });
         filterMenu.add(detectEdgesMenuItem);
@@ -132,84 +134,79 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
         sharpenMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Apply detect edges filter to the photo
-            	//new FilterDialog(PhotoEditingFrame.this,photo, new SharpenFilter());
-            	checkType(new SharpenFilter());
+                checkType(new SharpenFilter());
             }
         });
         filterMenu.add(sharpenMenuItem);
-        
+
         JMenuItem brightnessMenuItem = new JMenuItem("Brightness");
         brightnessMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Apply detect edges filter to the photo
-            	//new FilterDialog(PhotoEditingFrame.this,photo, new BrightnessFilter());
-            	checkType(new BrightnessFilter());
+                checkType(new BrightnessFilter());
             }
         });
         filterMenu.add(brightnessMenuItem);
-        
-        JMenuItem grayScaleMenuItem = new JMenuItem("GrayScale");
+
+        JMenuItem grayScaleMenuItem = new JMenuItem("Gray scale");
         grayScaleMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Apply detect edges filter to the photo
-            	//new FilterDialog(PhotoEditingFrame.this,photo, new GrayscaleFilter());
-            	checkType(new GrayscaleFilter());
+                checkType(new GrayscaleFilter());
             }
         });
         filterMenu.add(grayScaleMenuItem);
         
+        JMenuItem contrastMenuItem = new JMenuItem("Contrast");
+        contrastMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkType(new ContrastFilter());
+            }
+        });
+        filterMenu.add(contrastMenuItem);
+
         // Add the filter menu to the menu bar
         menuBar.add(filterMenu);
 
         // Create the options menu
         JMenu optionsMenu = new JMenu("Options");
-        
-        
+
         JMenuItem shareMenuItem = new JMenuItem("Share");
         shareMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Perform rotation on the photo
-            	try {
-					photo.setPublic(true);
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+                try {
+                    photo.setPublic(true);
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
         optionsMenu.add(shareMenuItem);
-        
-        //add a description
+
         JMenuItem descriptionMenuItem = new JMenuItem("Add description");
         descriptionMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JTextField textField = new JTextField(20); // Create a text field
-                
-                // Create a panel with the text field
+                JTextField textField = new JTextField(20);
                 Object[] message = {
-                    "Enter the description:", textField
+                        "Enter the description:", textField
                 };
-                
+
                 int option = JOptionPane.showOptionDialog(null, message, "Enter description", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-                
+
                 if (option == JOptionPane.OK_OPTION) {
-                    String txt = textField.getText(); // Retrieve the text from the text field
+                    String txt = textField.getText();
                     try {
-						photo.setDescription(txt);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-                    System.out.println("Entered : " + txt);
-                } 
+                        photo.setDescription(txt);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    System.out.println("Entered: " + txt);
+                }
             }
         });
         optionsMenu.add(descriptionMenuItem);
@@ -219,78 +216,63 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener{
 
         return menuBar;
     }
-    
+
+    /**
+     * Checks the user type and opens the filter dialog for the selected filter if applicable.
+     *
+     * @param filter the selected filter
+     */
     private void checkType(PhotoFilter filter) {
         User currentUser = Authentication.getInstance().getCurrentUser();
 
         if (currentUser instanceof FreeUser) {
             if (filter instanceof BlurFilter || filter instanceof SharpenFilter) {
-                // Open the filter dialog for the selected filter
                 new FilterDialog(PhotoEditingFrame.this, photo, filter);
             } else {
                 JOptionPane.showMessageDialog(this, "Free tier users can only apply blur and sharpen filters.", "Warning", JOptionPane.WARNING_MESSAGE);
             }
         } else if (currentUser instanceof HobbyistUser) {
             if (filter instanceof BlurFilter || filter instanceof SharpenFilter || filter instanceof BrightnessFilter) {
-                // Open the filter dialog for the selected filter
                 new FilterDialog(PhotoEditingFrame.this, photo, filter);
             } else {
                 JOptionPane.showMessageDialog(this, "Hobbyist tier users can apply blur, sharpen, brightness, and contrast filters.", "Warning", JOptionPane.WARNING_MESSAGE);
             }
         } else if (currentUser instanceof ProfessionalUser) {
-            // All filters can be applied by professional tier users
-            // Open the filter dialog for the selected filter
             new FilterDialog(PhotoEditingFrame.this, photo, filter);
         }
     }
 
-
-
-    @Override 
+    @Override
     public void dispose() {
-    	photo.removeListener(this);
-    	super.dispose();
+        photo.removeListener(this);
+        super.dispose();
     }
 
-	@Override
-	public void onDeleted(Photo photo) {
-		// TODO Auto-generated method stub
-		dispose();
-	}
+    @Override
+    public void onDeleted(Photo photo) {
+        dispose();
+    }
 
-
-
-	@Override
-	public void onFilterApplied(Photo photo) {
-		// TODO Auto-generated method stub
+    @Override
+    public void onFilterApplied(Photo photo) {
         photoLabel = new JLabel();
         photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
         photoLabel.revalidate();
         photoLabel.repaint();
-	}
+    }
 
+    @Override
+    public void onDescriptionChanged(Photo photo) {
+        // TODO: Implement method
+    }
 
+    @Override
+    public void onCommentAdded(Photo photo) {
+        // TODO: Implement method
+    }
 
-	@Override
-	public void onDescriptionChanged(Photo photo) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public void onCommentAdded(Photo photo) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public void onVisibilityChanged(Photo photo) {
-		// TODO Auto-generated method stub
-		
-	}
-    
+    @Override
+    public void onVisibilityChanged(Photo photo) {
+        // TODO: Implement method
+    }
 }

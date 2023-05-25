@@ -106,7 +106,6 @@ public class FilterDialog extends JDialog {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Applying filter with value: " + selectedValue);
 	}
 
 	private void saveFilter() {
@@ -123,14 +122,19 @@ public class FilterDialog extends JDialog {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Saving filter with value: " + selectedValue);
+		
 	}
 
 	private void cancelFilter() {
 		// Perform actions to cancel the filter
-		parent.updatePhoto(photo);
-		System.out.println("Filter canceled");
+
 		dispose();
+	}
+	
+	@Override
+	public void dispose() {
+		parent.updatePhoto(photo);
+		super.dispose();
 	}
 
 }

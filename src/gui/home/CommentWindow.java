@@ -19,12 +19,11 @@ import auth.Authentication;
 import models.Comment;
 import models.Photo;
 
+/**
+ * Represents the comment window for a photo.
+ */
 public class CommentWindow extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 4382791163551113422L;
-	private JPanel commentPanelContainer;
+    private JPanel commentPanelContainer;
     private JPanel commentContentContainer;
     private JTextArea commentTextArea;
     private JButton commentButton;
@@ -32,9 +31,14 @@ public class CommentWindow extends JFrame {
     private List<CommentPanel> commentPanels;
     private Photo photo;
 
+    /**
+     * Constructs a new CommentWindow object for the given photo.
+     *
+     * @param photo the photo object
+     */
     public CommentWindow(Photo photo) {
         commentPanels = new ArrayList<>();
-        this.photo=photo;
+        this.photo = photo;
 
         commentPanelContainer = new JPanel(new BorderLayout());
         commentContentContainer = new JPanel();
@@ -61,27 +65,35 @@ public class CommentWindow extends JFrame {
         getContentPane().add(inputPanel, BorderLayout.SOUTH);
 
         setMinimumSize(new Dimension(500, 400));
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Change the default close operation
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setTitle("Comment Window");
         setVisible(true);
     }
-    
+
+    /**
+     * Sets the comments for the photo.
+     *
+     * @param photo the photo object
+     */
     private void setComments(Photo photo) {
-    	for(Comment comment : photo.getComments()) {
-        	CommentPanel commentPanel = new CommentPanel(comment);
+        for (Comment comment : photo.getComments()) {
+            CommentPanel commentPanel = new CommentPanel(comment);
             commentPanels.add(commentPanel);
             commentPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, commentPanel.getPreferredSize().height));
             commentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
             commentContentContainer.add(commentPanel);
-    	}
+        }
     }
 
+    /**
+     * Adds a new comment to the photo.
+     */
     private void addComment() {
         String text = commentTextArea.getText();
         if (!text.isEmpty()) {
-        	Comment comment=new Comment(Authentication.getInstance().getCurrentUser(),text);
-        	photo.addComment(comment);
-        	CommentPanel commentPanel = new CommentPanel(comment);
+            Comment comment = new Comment(Authentication.getInstance().getCurrentUser(), text);
+            photo.addComment(comment);
+            CommentPanel commentPanel = new CommentPanel(comment);
             commentPanels.add(commentPanel);
 
             commentPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, commentPanel.getPreferredSize().height));

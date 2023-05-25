@@ -13,6 +13,9 @@ import gui.profile.OthersProfilePage;
 import gui.profile.ProfilePage;
 import models.User;
 
+/**
+ * The Navigator class handles navigation between different frames in the GUI.
+ */
 public class Navigator {
     public static final String AUTH_FRAME = "AuthFrame";
     public static final String PROFILE_PAGE = "ProfilePage";
@@ -30,6 +33,11 @@ public class Navigator {
         userStack = new Stack<>();
     }
 
+    /**
+     * Retrieves the singleton instance of the Navigator class.
+     *
+     * @return the Navigator instance
+     */
     public static synchronized Navigator getInstance() {
         if (instance == null) {
             instance = new Navigator();
@@ -37,20 +45,37 @@ public class Navigator {
         return instance;
     }
 
+    /**
+     * Navigates to the specified frame without passing a user object.
+     *
+     * @param frameName the name of the frame to navigate to
+     */
     public void navigateTo(String frameName) {
         navigateTo(frameName, null);
     }
 
+    /**
+     * Navigates to the specified frame with an optional user object.
+     *
+     * @param frameName the name of the frame to navigate to
+     * @param user      the user object to pass to the frame (can be null)
+     */
     public void navigateTo(String frameName, User user) {
-       if (currentFrame != null) {
+        if (currentFrame != null) {
             currentFrame.dispose();
         }
-
+        if (frameName.equals(AUTH_FRAME)) {
+            this.frameStack.clear();
+            this.userStack.clear();
+        }
         currentFrame = createFrame(frameName, user);
         currentFrame.setVisible(true);
         frameStack.push(frameName);
     }
 
+    /**
+     * Navigates back to the previous frame.
+     */
     public void navigateBack() {
         if (!frameStack.isEmpty()) {
             frameStack.pop();
@@ -73,17 +98,23 @@ public class Navigator {
         }
     }
 
+    /**
+     * Creates and configures a new JFrame based on the specified frame name and user object.
+     *
+     * @param frameName the name of the frame to create
+     * @param user      the user object to pass to the frame (can be null)
+     * @return the created JFrame
+     */
     private JFrame createFrame(String frameName, User user) {
         JFrame frame = null;
         switch (frameName) {
             case AUTH_FRAME:
-            	frame = new AuthFrame();
-            	frame.setMinimumSize(new Dimension(500, 700));
-            	frame.pack(); // Adjusts the frame size based on the components
-            	frame.setLocationRelativeTo(null); // Centers the frame on the screen
-            	frame.setVisible(true);
+                frame = new AuthFrame();
+                frame.setMinimumSize(new Dimension(500, 700));
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
                 return frame;
-                //break;
             case PROFILE_PAGE:
                 frame = new ProfilePage();
                 break;

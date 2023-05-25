@@ -27,6 +27,7 @@ import javax.swing.ScrollPaneConstants;
 import auth.Authentication;
 import gui.Application;
 import gui.IconButton;
+import gui.Navigator;
 import gui.TabBarPanel;
 import gui.home.DiscoveryPage;
 import gui.home.FileChooser;
@@ -110,8 +111,8 @@ public class ProfilePage extends JFrame implements PhotoListener{
         userInfoPanel.add(nicknameLabel, gbc);
 
         gbc.gridy++;
-        JLabel emailLabel = new JLabel(user.getEmailAddress());
-        userInfoPanel.add(emailLabel, gbc);
+        JLabel realName = new JLabel(user.getRealName()+user.getSurname());
+        userInfoPanel.add(realName, gbc);
 
         gbc.gridy++;
         JLabel ageLabel = new JLabel(user.getAge());
@@ -145,21 +146,9 @@ public class ProfilePage extends JFrame implements PhotoListener{
      */
     private void createMenuBar() {
         menuBar = new JMenuBar();
-
-        JMenu navigationMenu = new JMenu("Navigation");
-        JMenuItem discoveryMenuItem = new JMenuItem("Discovery");
-        discoveryMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	navigateToDicoveryPage();
-            }
-
-        });
-        navigationMenu.add(discoveryMenuItem);
-        menuBar.add(navigationMenu);
-        
+       
         JMenu optionsMenu = new JMenu("Options");
-        JMenuItem credentialsMenuItem = new JMenuItem("Credentials");
+        JMenuItem credentialsMenuItem = new JMenuItem("account");
         credentialsMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -167,18 +156,26 @@ public class ProfilePage extends JFrame implements PhotoListener{
             }
 
         });
-        
         optionsMenu.add(credentialsMenuItem);
+        
+        JMenuItem signOutMenuItem = new JMenuItem("account");
+        signOutMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to sign out?", "Sign Out Confirmation", JOptionPane.YES_NO_OPTION);
+                if (choice == JOptionPane.YES_OPTION) {
+                    Navigator.getInstance().navigateTo(Navigator.AUTH_FRAME);
+                }
+            }
+        });
+
+        optionsMenu.add(signOutMenuItem);
+        
         menuBar.add(optionsMenu);
 
         setJMenuBar(menuBar);
     }
     
-    
-    private void navigateToDicoveryPage() {
-        new DiscoveryPage();
-        dispose();
-    }
 
     /**
      * Creates the right panel of the profile page.

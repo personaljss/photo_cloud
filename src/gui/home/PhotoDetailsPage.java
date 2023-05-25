@@ -57,9 +57,9 @@ public class PhotoDetailsPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-					photo.setPublic(false);
+                	((Administrator) Authentication.getInstance().getCurrentUser()).banPhoto(photo);
 					dispose();
-				} catch (IOException e1) {
+				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}

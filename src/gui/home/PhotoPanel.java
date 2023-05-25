@@ -22,6 +22,10 @@ import services.ImageMatrix;
 import utils.BlurFilter;
 import utils.PhotoFilter;
 
+/**
+ * The PhotoPanel class represents a panel that displays a photo along with its information.
+ * It provides interaction functionalities such as mouse hover effects and click actions.
+ */
 public class PhotoPanel extends JPanel {
 
     private static final long serialVersionUID = 1305911466389510173L;
@@ -36,6 +40,13 @@ public class PhotoPanel extends JPanel {
     private static final int STANDARD_HEIGHT = 300;
     private static final Dimension PANEL_SIZE = new Dimension(STANDARD_WIDTH, STANDARD_HEIGHT);
 
+    /**
+     * Constructs a PhotoPanel object with the specified photo and self identification.
+     *
+     * @param photo   the photo to display
+     * @param isSelf  flag indicating if the photo belongs to the current user
+     * @throws IOException if an I/O error occurs while loading the photo
+     */
     public PhotoPanel(Photo photo, boolean isSelf) throws IOException {
         this.photo = photo;
         setLayout(new BorderLayout());
@@ -76,7 +87,7 @@ public class PhotoPanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 // Blur the image
-                BufferedImage blurredImage = new BlurFilter().apply(imageMatrix,100);
+                BufferedImage blurredImage = new BlurFilter().apply(imageMatrix, 100);
                 photoLabel.setIcon(new ImageIcon(blurredImage));
 
                 // Show info panel
@@ -96,20 +107,34 @@ public class PhotoPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (isSelf) {
                     new PhotoEditingFrame(photo);
-                }else {
-                	new PhotoDetailsPage(photo);
+                } else {
+                    new PhotoDetailsPage(photo);
                 }
             }
 
         });
-
     }
-    
+
+    /**
+     * Retrieves the photo associated with this panel.
+     *
+     * @return the photo object
+     */
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    /**
+     * Generates the text representation of the applied filters for the photo.
+     *
+     * @param appliedFilters the list of applied filters
+     * @return the text representation of the applied filters
+     */
     private String getAppliedFiltersText(List<PhotoFilter> appliedFilters) {
         StringBuilder sb = new StringBuilder("Applied Filters: ");
-        if(appliedFilters.size()==0) {
-        	sb.append("none");
-        	return sb.toString();
+        if (appliedFilters.size() == 0) {
+            sb.append("none");
+            return sb.toString();
         }
         for (PhotoFilter filter : appliedFilters) {
             sb.append(filter.toString()).append(", ");
@@ -120,15 +145,5 @@ public class PhotoPanel extends JPanel {
         }
         return sb.toString();
     }
-    
-    public Photo getPhoto() {
-        return photo;
-    }
-    /*
-    public void setDescription(String txt) {
-        descriptionLabel.setText(txt);
-        descriptionLabel.revalidate();
-        descriptionLabel.repaint();
-    }
-    */
+
 }
