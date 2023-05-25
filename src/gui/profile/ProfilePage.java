@@ -121,6 +121,7 @@ public class ProfilePage extends JFrame implements PhotoListener{
         gbc.gridy++;
         gbc.insets = new Insets(20, 0, 0, 0);
         IconButton uploadButton = new IconButton(new ImageIcon("resources/upload.png"), 32);
+        uploadButton.setToolTipText("upload images");
         uploadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

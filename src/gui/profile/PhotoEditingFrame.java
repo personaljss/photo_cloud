@@ -101,6 +101,7 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener {
 			photoLabel.setIcon(new ImageIcon(photo.getImageMatrix().getBufferedImage()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			Logger.getInstance().logError(e.getMessage());
 			e.printStackTrace();
 		}
 		photoLabel.revalidate();

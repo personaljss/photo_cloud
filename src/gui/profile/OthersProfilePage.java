@@ -12,17 +12,20 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import auth.Authentication;
 import gui.IconButton;
+import gui.Navigator;
 import gui.TabBarPanel;
 import gui.home.DiscoveryPhotoPanel;
+import models.Administrator;
 import models.Photo;
 import models.User;
 import services.Logger;
@@ -55,7 +58,6 @@ public class OthersProfilePage extends JFrame {
 
 
    
-
     private void createLeftPanel() {
         JPanel leftPanel = new JPanel(new GridBagLayout());
         leftPanel.setPreferredSize(new Dimension(200, getHeight()));
@@ -76,7 +78,7 @@ public class OthersProfilePage extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(10, 0, 10, 0);
 
-        JLabel nicknameLabel = new JLabel(user.getNickname()+" ("+user.getType()+")");
+        JLabel nicknameLabel = new JLabel(user.getNickname() + " (" + user.getType() + ")");
         userInfoPanel.add(nicknameLabel, gbc);
 
         gbc.gridy++;
@@ -88,7 +90,32 @@ public class OthersProfilePage extends JFrame {
         userInfoPanel.add(ageLabel, gbc);
 
         gbc.gridy++;
-        gbc.insets = new Insets(20, 0, 0, 0);
+        gbc.anchor = GridBagConstraints.CENTER; // Center horizontally
+        gbc.insets = new Insets(0, 0, 0, 0); // Reset insets
+
+        // If the current user is an Admin, create a ban user button
+        if (Authentication.getInstance().getCurrentUser() instanceof Administrator && !(user instanceof Administrator)) {
+            gbc.gridy++;
+            IconButton banButton = new IconButton(new ImageIcon("resources/ban.png"), 32);
+            banButton.setToolTipText("delete account");
+            banButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + user.getNickname() + "'s account?", "Confirm Account Deletion", JOptionPane.YES_NO_OPTION);
+                    if (option == JOptionPane.YES_OPTION) {
+                        try {
+                            User.delete(user);
+                            Logger.getInstance().logInfo(user.getNickname() + "'s account is deleted.");
+                            Navigator.getInstance().navigateBack();
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                            Logger.getInstance().logError(e1.getMessage());
+                        }
+                    }
+                }
+            });
+            userInfoPanel.add(banButton, gbc);
+        }
 
         // Add the components to the left panel
         gbc.gridx = 0;
@@ -98,8 +125,17 @@ public class OthersProfilePage extends JFrame {
         gbc.gridy++;
         leftPanel.add(userInfoPanel, gbc);
 
+        // Adjust the position of the banButton in the grid
+        gbc.gridy++;
+        gbc.weighty = 1.0; // Increase weight to push the button downwards
+        leftPanel.add(new JPanel(), gbc); // Add an empty panel for vertical spacing
+
         getContentPane().add(leftPanel, BorderLayout.WEST);
     }
+
+   
+    
+    
     private void createRightPanel() {
         rightPanel = new JPanel(new GridLayout(0, 3, 10, 10)); // Use GridLayout with 3 columns
         JScrollPane scrollPane = new JScrollPane(rightPanel);

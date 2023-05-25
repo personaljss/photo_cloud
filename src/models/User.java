@@ -116,6 +116,54 @@ public abstract class User implements Serializable {
 		}
 		return user;
 	}
+	
+	/**
+	 * Deletes a user and their associated folders recursively.
+	 *
+	 * @param user the user to delete
+	 * @throws IOException if an error occurs while deleting the user folders
+	 */
+	public static void delete(User user) throws IOException {
+	    // Delete user folder recursively
+	    File userFolder = new File("data/" + user.getNickname());
+	    deleteFolder(userFolder);
+	    AppState.getInstance().getUsers().remove(user.getNickname());
+	    // Optionally perform additional cleanup tasks
+
+	    // Log deletion
+	    System.out.println("User " + user.getNickname() + " and associated folders have been deleted.");
+	}
+
+	/**
+	 * Deletes a folder and its contents recursively.
+	 *
+	 * @param folder the folder to delete
+	 * @throws IOException if an error occurs while deleting the folder
+	 */
+	private static void deleteFolder(File folder) throws IOException {
+	    if (folder.exists()) {
+	        File[] files = folder.listFiles();
+	        if (files != null) {
+	            for (File file : files) {
+	                if (file.isDirectory()) {
+	                    // Recursively delete subfolders
+	                    deleteFolder(file);
+	                } else {
+	                    // Delete file
+	                    if (!file.delete()) {
+	                        throw new IOException("Failed to delete file: " + file.getAbsolutePath());
+	                    }
+	                }
+	            }
+	        }
+
+	        // Delete the folder itself
+	        if (!folder.delete()) {
+	            throw new IOException("Failed to delete folder: " + folder.getAbsolutePath());
+	        }
+	    }
+	}
+
 
 	protected void save() throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(getDataFile());

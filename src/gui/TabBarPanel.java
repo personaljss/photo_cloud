@@ -59,6 +59,7 @@ public class TabBarPanel extends JPanel {
 
         // Profile button
         profileButton = new IconButton(new ImageIcon("resources/profile.png"), 32);
+        profileButton.setToolTipText("profile");
         profileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -74,6 +75,7 @@ public class TabBarPanel extends JPanel {
         centerPanel.add(spacingPanel);
         // Discovery button
         discoveryButton = new IconButton(new ImageIcon("resources/discovery.png"), 32);
+        discoveryButton.setToolTipText("discovery");
         discoveryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -215,7 +215,7 @@ public class Photo implements Serializable {
 	    ImageSecretary.writeImageToResources(image, getImageFile().getPath(),extension);
 		long endTime = System.currentTimeMillis();
 		long elapsedTime = endTime - startTime;
-		Logger.getInstance().logInfo(this.fileName+" image has been modified");
+		Logger.getInstance().logInfo(this.fileName+" image has been modified.Elapsed time: "+elapsedTime);
 	}
 
 	/**

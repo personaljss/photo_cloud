@@ -33,12 +33,14 @@ public class ProfilePhotoPanel extends JPanel {
 	private int size;
 	private boolean isHovered;
 	private User user;
+	private boolean isSelf;
 
 	private static final int TEXT_SIZE = 14;
 	private static final Color TEXT_COLOR = Color.WHITE;
 	private static final String CHANGE_TEXT = "Change";
 
 	public ProfilePhotoPanel(User user, int size) {
+		this.isSelf=user.equals(Authentication.getInstance().getCurrentUser());
 		this.user = user;
 		try {
 			this.profileImage = loadProfileImage();
@@ -53,7 +55,7 @@ public class ProfilePhotoPanel extends JPanel {
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
 		setOpaque(false); // Make the panel transparent
 
-		if (user.equals(Authentication.getInstance().getCurrentUser())) {
+		if (isSelf) {
 			// Add mouse listener
 			addMouseListener(new MouseAdapter() {
 				@Override
