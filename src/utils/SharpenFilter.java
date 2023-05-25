@@ -6,10 +6,10 @@ import services.ImageMatrix;
 
 public class SharpenFilter extends PhotoFilter {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -7653226720981526309L;
-	private static final double SHARPEN_FACTOR = 0.5;
+     *
+     */
+    private static final long serialVersionUID = -7653226720981526309L;
+    private static final double SHARPEN_FACTOR = 1;
 
     @Override
     public BufferedImage apply(ImageMatrix image, int value) {

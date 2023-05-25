@@ -1,7 +1,9 @@
 package listeners;
 
 import models.Photo;
-
+/*
+ * interface responsible for the communication between the photo objects and ui
+ * */
 public interface PhotoListener {
 	void onDeleted(Photo photo);
 

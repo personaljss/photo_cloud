@@ -82,7 +82,7 @@ public class AppState {
 
 				readImages(user);
 			} catch (IOException | ClassNotFoundException e) {
-				Logger.logError(e.getMessage());
+				Logger.getInstance().logError(e.getMessage());
 			}
 		}
 	}

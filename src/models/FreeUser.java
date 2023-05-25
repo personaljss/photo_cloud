@@ -1,8 +1,6 @@
 package models;
 
 public class FreeUser extends User {
-
-
 	/**
 	 * 
 	 */
@@ -12,12 +10,10 @@ public class FreeUser extends User {
         super(nickname, password, realName, surname, age, emailAddress);
     }
 
+	@Override
+	public String getType() {
+		// TODO Auto-generated method stub
+		return "Free";
+	}
 
-	public void applyFilter(String filterName) {
-        // only allow "Blur" and "Sharpen"
-    }
-
-    public void sharePhoto(String photoPath, String description) {
-        // Implementation for sharing photo
-    }
 }

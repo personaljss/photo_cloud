@@ -1,5 +1,8 @@
 package models;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 public class Administrator extends ProfessionalUser {
     
 	/**
@@ -11,8 +14,13 @@ public class Administrator extends ProfessionalUser {
         super(nickname, password, realName, surname, age, emailAddress);
     }
 
-    public void removePhoto(String photoPath) {
+    public void banPhoto(Photo photo) throws FileNotFoundException, IOException {
         // Implementation for removing photo from Discover page
-        // and the owner's Profile page
+        photo.setPublic(false);
+    }
+    
+    @Override 
+    public String getType() {
+    	return "Administrator";
     }
 }

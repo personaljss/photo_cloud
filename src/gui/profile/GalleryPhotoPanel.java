@@ -17,6 +17,7 @@ import auth.Authentication;
 import gui.home.PhotoPanel;
 import models.Photo;
 import models.User;
+import services.Logger;
 
 public class GalleryPhotoPanel extends JPanel {
 
@@ -45,6 +46,7 @@ public class GalleryPhotoPanel extends JPanel {
         try {
             photoPanel = new PhotoPanel(photo,true);
         } catch (IOException e1) {
+        	Logger.getInstance().logError(e1.getMessage());
             e1.printStackTrace();
         }
 
@@ -103,6 +105,7 @@ public class GalleryPhotoPanel extends JPanel {
                         shareButton.setText("Share");
                         shareButton.setIcon(new ImageIcon("resources/share.png"));
                     } catch (Exception e1) {
+                    	Logger.getInstance().logError(e1.getMessage());
                         e1.printStackTrace();
                     }
                 } else {
@@ -111,6 +114,7 @@ public class GalleryPhotoPanel extends JPanel {
                         shareButton.setText("Make private");
                         shareButton.setIcon(new ImageIcon("resources/invisible.png"));
                     } catch (Exception e1) {
+                    	Logger.getInstance().logError(e1.getMessage());
                         e1.printStackTrace();
                     }
                 }
@@ -126,6 +130,7 @@ public class GalleryPhotoPanel extends JPanel {
                     currentUser.removePhoto(photo);
                     success = true;
                 } catch (Exception e1) {
+                	Logger.getInstance().logError(e1.getMessage());
                     e1.printStackTrace();
                 }
 

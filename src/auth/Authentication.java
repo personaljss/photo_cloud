@@ -54,7 +54,7 @@ public class Authentication {
         } else {
             result = new AuthResult(false, "Password is wrong.");
         }
-	    Logger.logInfo(nickName + ": " + (result != null ? result.getMessage() : "null"));
+    	Logger.getInstance().logInfo(nickName + ": " + (result != null ? result.getMessage() : "null"));
 	    return result;
 	}
 
@@ -84,10 +84,10 @@ public class Authentication {
 	        User user = User.create(nickName, password, realName, surname, age, emailAddress, type);
 	        appState.addUser(user);
 	        result = new AuthResult(true, "Signed up successfully");
-		    Logger.logInfo("User " + nickName + " created.");
+	        Logger.getInstance().logInfo("User " + nickName + " created.");
 	    } catch (IOException e) {
 	        result = new AuthResult(false, "A problem occurred.");
-	        Logger.logError(e.getMessage());
+	        Logger.getInstance().logInfo(e.getMessage());
 	    }
 	    return result;
 	}
@@ -98,9 +98,7 @@ public class Authentication {
 	// TODO: Implement these methods with actual checks
 
 	public boolean checkPassword(String password) {
-	    // Password should be at least 5 characters long and include at least one digit.
-	    String passwordPattern = "^(?=.*[0-9]).{5,}$";
-	    return password.matches(passwordPattern);
+        return password.length() >= 5;
 	}
 
 

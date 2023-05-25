@@ -11,11 +11,10 @@ public class HobbyistUser extends User {
         super(nickname, password, realName, surname, string, emailAddress);
     }
 
-    public void applyFilter(String filterName) {
-        // allow "Blur", "Sharpen", "Brightness", and "Contrast"
-    }
 
-    public void sharePhoto(String photoPath, String description) {
-        // Implementation for sharing photo
-    }
+	@Override
+	public String getType() {
+		// TODO Auto-generated method stub
+		return "Hobbyist";
+	}
 }

@@ -34,6 +34,7 @@ import gui.home.FileChooser;
 import listeners.PhotoListener;
 import models.Photo;
 import models.User;
+import services.Logger;
 
 /**
  * Represents the profile page of a user.
@@ -58,7 +59,6 @@ public class ProfilePage extends JFrame implements PhotoListener{
         createLeftPanel();
         createRightPanel();
         createMenuBar();
-        //setVisible(true);
     }
 
     /**
@@ -107,11 +107,11 @@ public class ProfilePage extends JFrame implements PhotoListener{
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(10, 0, 10, 0);
 
-        JLabel nicknameLabel = new JLabel(user.getNickname());
+        JLabel nicknameLabel = new JLabel(user.getNickname()+" ("+user.getType()+")");
         userInfoPanel.add(nicknameLabel, gbc);
 
         gbc.gridy++;
-        JLabel realName = new JLabel(user.getRealName()+user.getSurname());
+        JLabel realName = new JLabel(user.getRealName()+" "+user.getSurname());
         userInfoPanel.add(realName, gbc);
 
         gbc.gridy++;
@@ -158,7 +158,7 @@ public class ProfilePage extends JFrame implements PhotoListener{
         });
         optionsMenu.add(credentialsMenuItem);
         
-        JMenuItem signOutMenuItem = new JMenuItem("account");
+        JMenuItem signOutMenuItem = new JMenuItem("sign out");
         signOutMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -207,6 +207,7 @@ public class ProfilePage extends JFrame implements PhotoListener{
                 //panel.setGalleryActionListener(this);
                 rightPanel.add(panel);
             } catch (IOException e) {
+            	Logger.getInstance().logError(e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -249,9 +250,11 @@ public class ProfilePage extends JFrame implements PhotoListener{
                 Photo.create(user, fileChooser.getSelectedFile());
                 displayImages(); // Update the gallery display
             } catch (IOException e) {
+            	Logger.getInstance().logError(e.getMessage());
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
                 e.printStackTrace();
             } catch (Exception e) {
+            	Logger.getInstance().logError(e.getMessage());
                 e.printStackTrace();
             }
         }

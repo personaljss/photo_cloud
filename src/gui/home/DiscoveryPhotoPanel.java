@@ -6,7 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
@@ -15,12 +14,11 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import auth.Authentication;
-import exceptions.UserAlreadyLikedPhotoException;
-import exceptions.UserDidNotLikePhotoException;
 import gui.Navigator;
 import listeners.PhotoListener;
 import models.Photo;
 import models.User;
+import services.Logger;
 
 /**
  * Represents a photo panel in the discovery page.
@@ -58,6 +56,7 @@ public class DiscoveryPhotoPanel extends JPanel implements PhotoListener{
         try {
             photoPanel = new PhotoPanel(photo,false);
         } catch (IOException e1) {
+     		Logger.getInstance().logError(e1.getMessage());
             e1.printStackTrace();
             return;
         }
@@ -71,22 +70,14 @@ public class DiscoveryPhotoPanel extends JPanel implements PhotoListener{
                 if (!photo.getLikes().contains(user)) {
                     try {
                         photo.like(user);
-                    } catch (FileNotFoundException e1) {
-                        e1.printStackTrace();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    } catch (UserAlreadyLikedPhotoException e1) {
-                        e1.printStackTrace();
+                    } catch(Exception e1) {
+            			Logger.getInstance().logError(e1.getMessage());
                     }
                 } else {
                     try {
                         photo.disLike(user);
-                    } catch (FileNotFoundException e1) {
-                        e1.printStackTrace();
-                    } catch (UserDidNotLikePhotoException e1) {
-                        e1.printStackTrace();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                    }  catch(Exception e1) {
+            			Logger.getInstance().logError(e1.getMessage());
                     }
                 }
                 likeButton.setText(Integer.toString(photo.getLikes().size()));
@@ -107,7 +98,7 @@ public class DiscoveryPhotoPanel extends JPanel implements PhotoListener{
 
         });
 
-        profileButton = new JButton(photo.getOwner().getNickname());
+        profileButton = new JButton(photo.getOwner().getNickname()+" ("+photo.getOwner().getType()+")");
         profileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -16,6 +16,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import models.Photo;
+import services.Logger;
 import utils.PhotoFilter;
 
 public class FilterDialog extends JDialog {
@@ -103,7 +104,7 @@ public class FilterDialog extends JDialog {
 			filteredImage=filter.apply(photo.getImageMatrix(), selectedValue);
 			parent.updatePhoto(filteredImage);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+        	Logger.getInstance().logError(e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -114,12 +115,10 @@ public class FilterDialog extends JDialog {
 			return;
 		}
 		try {
-			//photo.update(filteredImage);
 			photo.addFilter(filter, filteredImage);
-			//parentPanel.update();
 			dispose();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+        	Logger.getInstance().logError(e.getMessage());
 			e.printStackTrace();
 		}
 		

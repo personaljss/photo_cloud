@@ -1,1 +1,19 @@
-dr: Login successful.
+[Thu May 25 07:56:35 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 07:59:48 TRT 2023][INFO] dr: Wrong nickName.
+[Thu May 25 07:59:57 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 08:02:21 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 08:04:04 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 08:20:05 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 08:20:23 TRT 2023][INFO] adminappliedEdge Detection Filterto the image: admin1
+[Thu May 25 08:30:59 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 08:50:09 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 08:50:19 TRT 2023][INFO] admin applied Brightness Filter to the image: admin1
+[Thu May 25 09:10:08 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 09:10:33 TRT 2023][INFO] admin applied Contrast Filter to the image: admin1
+[Thu May 25 09:11:55 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 09:13:18 TRT 2023][INFO] admin applied Edge Detection Filter to the image: admin1
+[Thu May 25 09:32:25 TRT 2023][INFO] admin applied Blur Filter to the image: admin1
+[Thu May 25 09:36:39 TRT 2023][INFO] admin applied Blur Filter to the image: admin1
+[Thu May 25 09:43:21 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 09:43:48 TRT 2023][INFO] admin applied Contrast Filter to the image: admin1
+[Thu May 25 09:45:41 TRT 2023][INFO] admin: Login successful.

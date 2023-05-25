@@ -10,11 +10,9 @@ public class ProfessionalUser extends User {
         super(nickname, password, realName, surname, age, emailAddress);
     }
 
-    public void applyFilter(String filterName) {
-        // allow all filters
-    }
-
-    public void sharePhoto(String photoPath, String description) {
-        // Implementation for sharing photo
-    }
+	@Override
+	public String getType() {
+		// TODO Auto-generated method stub
+		return "Professional";
+	}
 }

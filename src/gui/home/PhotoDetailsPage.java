@@ -3,7 +3,6 @@ package gui.home;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -15,6 +14,7 @@ import javax.swing.JMenuItem;
 import auth.Authentication;
 import models.Administrator;
 import models.Photo;
+import services.Logger;
 
 public class PhotoDetailsPage extends JFrame {
     /**
@@ -60,6 +60,7 @@ public class PhotoDetailsPage extends JFrame {
                 	((Administrator) Authentication.getInstance().getCurrentUser()).banPhoto(photo);
 					dispose();
 				} catch (Exception e1) {
+					Logger.getInstance().logError(e1.getMessage());
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}

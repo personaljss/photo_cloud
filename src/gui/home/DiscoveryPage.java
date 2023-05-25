@@ -21,6 +21,7 @@ import gui.TabBarPanel;
 import listeners.PhotoListener;
 import models.AppState;
 import models.Photo;
+import services.Logger;
 
 /**
  * The DiscoveryPage class represents the user interface for the discovery
@@ -124,6 +125,7 @@ public class DiscoveryPage extends JFrame implements PhotoListener{
                 //panel.setGalleryActionListener(this);
                 rightPanel.add(panel);
             } catch (IOException e) {
+            	Logger.getInstance().logError(e.getMessage());
                 e.printStackTrace();
             }
         }

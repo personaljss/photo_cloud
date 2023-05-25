@@ -27,7 +27,7 @@ public abstract class User implements Serializable {
 	private String surname;
 	private String age;
 	private String emailAddress;
-	private String profilePhotoPath; 
+	private String profilePhotoPath;
 	private List<Photo> album;
 
 	private static String defaultProfilePhotoPath = "resources/defaultProfilePhoto.png";
@@ -39,7 +39,7 @@ public abstract class User implements Serializable {
 		this.surname = surname;
 		this.age = age;
 		this.emailAddress = emailAddress;
-		if (profilePhotoPath==null  || !Paths.get(profilePhotoPath).toFile().exists()) {
+		if (profilePhotoPath == null || !Paths.get(profilePhotoPath).toFile().exists()) {
 			profilePhotoPath = defaultProfilePhotoPath;
 		}
 		album = new ArrayList<>();
@@ -146,11 +146,11 @@ public abstract class User implements Serializable {
 	public void removePhoto(Photo photo) throws Exception {
 		System.out.println(this);
 		boolean removed = album.remove(photo);
-		
+
 		if (!removed) {
 			throw new Exception("Photo not found");
 		}
-		
+
 		try {
 			save();
 			photo.delete();
@@ -162,6 +162,16 @@ public abstract class User implements Serializable {
 
 	public List<Photo> getAlbum() {
 		return album;
+	}
+
+	public List<Photo> getSharedAlbum() {
+		List<Photo> list = new ArrayList<>();
+		for (Photo photo : album) {
+			if (photo.isPublic()) {
+				list.add(photo);
+			}
+		}
+		return list;
 	}
 
 	public void setAlbum(List<Photo> album) {
@@ -309,9 +319,7 @@ public abstract class User implements Serializable {
 		return Paths.get(profilePhotoPath).toFile();
 	}
 
-	public abstract void applyFilter(String filterName);
-
-	public abstract void sharePhoto(String photoPath, String description);
+	public abstract String getType();
 
 	@Override
 	public boolean equals(Object object) {

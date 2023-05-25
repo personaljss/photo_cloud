@@ -4,14 +4,20 @@ import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
 
+/**
+ * The EdgeDetectionFilter class applies an edge detection algorithm to an image.
+ * It detects the edges in the image using the Sobel operator.
+ */
 public class EdgeDetectionFilter extends PhotoFilter {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 8067555080706777048L;
-
-	@Override
+     * Applies the edge detection filter to the given image matrix.
+     *
+     * @param imageMatrix the image matrix to apply the filter to
+     * @param value       an optional value for the filter (not used in this implementation)
+     * @return the filtered image as a BufferedImage
+     */
+    @Override
     public BufferedImage apply(ImageMatrix imageMatrix, int value) {
         // Convert the image matrix to a grayscale image
         GrayscaleFilter grayscaleFilter = new GrayscaleFilter();
@@ -46,6 +52,15 @@ public class EdgeDetectionFilter extends PhotoFilter {
         return edgeImage.getBufferedImage();
     }
 
+    /**
+     * Applies the given kernel to the image matrix at the specified location.
+     *
+     * @param imageMatrix the image matrix to apply the kernel to
+     * @param kernel      the kernel to apply
+     * @param x           the x-coordinate of the pixel
+     * @param y           the y-coordinate of the pixel
+     * @return the result of applying the kernel to the pixel
+     */
     private int applyKernel(ImageMatrix imageMatrix, int[][] kernel, int x, int y) {
         int result = 0;
 
@@ -62,9 +77,14 @@ public class EdgeDetectionFilter extends PhotoFilter {
 
         return result;
     }
-    
-    @Override 
+
+    /**
+     * Returns a string representation of the filter.
+     *
+     * @return the name of the filter
+     */
+    @Override
     public String toString() {
-    	return "Edge Detection Filter";
+        return "Edge Detection Filter";
     }
 }

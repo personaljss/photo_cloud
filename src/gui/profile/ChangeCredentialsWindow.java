@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 
 import auth.Authentication;
 import models.User;
+import services.Logger;
 
 public class ChangeCredentialsWindow extends JFrame {
 
@@ -138,6 +139,7 @@ public class ChangeCredentialsWindow extends JFrame {
         } catch (IOException e) {
             // Handle the exception
             e.printStackTrace();
+        	Logger.getInstance().logError(e.getMessage());
             JOptionPane.showMessageDialog(this, "Failed to update credentials!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }

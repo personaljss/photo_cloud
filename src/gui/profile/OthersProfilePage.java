@@ -25,6 +25,7 @@ import gui.TabBarPanel;
 import gui.home.DiscoveryPhotoPanel;
 import models.Photo;
 import models.User;
+import services.Logger;
 
 public class OthersProfilePage extends JFrame {
 
@@ -75,7 +76,7 @@ public class OthersProfilePage extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(10, 0, 10, 0);
 
-        JLabel nicknameLabel = new JLabel(user.getNickname());
+        JLabel nicknameLabel = new JLabel(user.getNickname()+" ("+user.getType()+")");
         userInfoPanel.add(nicknameLabel, gbc);
 
         gbc.gridy++;
@@ -118,12 +119,13 @@ public class OthersProfilePage extends JFrame {
     public void displayImages() {
         rightPanel.removeAll(); // Clear existing images
 
-        for (Photo photo : user.getAlbum()) {
+        for (Photo photo : user.getSharedAlbum()) {
             try {
                 DiscoveryPhotoPanel panel = new DiscoveryPhotoPanel(photo);
                 //panel.setGalleryActionListener(this);
                 rightPanel.add(panel);
             } catch (IOException e) {
+            	Logger.getInstance().logError(e.getMessage());
                 e.printStackTrace();
             }
         }
