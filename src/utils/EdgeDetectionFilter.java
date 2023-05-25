@@ -3,6 +3,7 @@ package utils;
 import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
+import services.Logger;
 
 /**
  * The EdgeDetectionFilter class applies an edge detection algorithm to an image.
@@ -19,6 +20,7 @@ public class EdgeDetectionFilter extends PhotoFilter {
      */
     @Override
     public BufferedImage apply(ImageMatrix imageMatrix, int value) {
+		long startTime = System.currentTimeMillis();
         // Convert the image matrix to a grayscale image
         GrayscaleFilter grayscaleFilter = new GrayscaleFilter();
         ImageMatrix grayscaleImage = new ImageMatrix(grayscaleFilter.apply(imageMatrix, value));
@@ -48,6 +50,9 @@ public class EdgeDetectionFilter extends PhotoFilter {
                 edgeImage.setRGB(x, y, ImageMatrix.convertRGB(gradient, gradient, gradient));
             }
         }
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(toString()+" applied. Execution:"+elapsedTime);
 
         return edgeImage.getBufferedImage();
     }

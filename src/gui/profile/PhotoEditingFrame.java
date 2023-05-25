@@ -51,7 +51,6 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener {
 	public PhotoEditingFrame(Photo photo) {
 		this.photo = photo;
 		photo.addListener(this);
-		updatePhoto(photo);
 		setTitle("Photo Editing");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -75,14 +74,17 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener {
 		add(centerPanel);
 		pack();
 		//setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+		updatePhoto(photo);
 		setVisible(true);
 	}
 
+	/*
 	/**
 	 * Updates the displayed photo with the given image.
 	 *
 	 * @param image the updated image
 	 */
+
 	public void updatePhoto(BufferedImage image) {
 		photoLabel.setIcon(new ImageIcon(image));
 		photoLabel.revalidate();
@@ -95,7 +97,12 @@ public class PhotoEditingFrame extends JFrame implements PhotoListener {
 	 * @param photo the updated photo
 	 */
 	public void updatePhoto(Photo photo) {
-		photoLabel.setIcon(new ImageIcon(photo.getImageFile().getPath()));
+		try {
+			photoLabel.setIcon(new ImageIcon(photo.getImageMatrix().getBufferedImage()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		photoLabel.revalidate();
 		photoLabel.repaint();
 	}

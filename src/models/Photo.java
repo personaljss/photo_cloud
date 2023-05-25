@@ -211,7 +211,11 @@ public class Photo implements Serializable {
 	 * @throws IOException if an I/O error occurs while updating the photo
 	 */
 	private void update(BufferedImage image) throws IOException {
+		long startTime = System.currentTimeMillis();
 	    ImageSecretary.writeImageToResources(image, getImageFile().getPath(),extension);
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(this.fileName+" image has been modified");
 	}
 
 	/**

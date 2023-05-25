@@ -3,6 +3,8 @@ package utils;
 import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
+import services.ImageSecretary;
+import services.Logger;
 
 public class BlurFilter extends PhotoFilter{
 	/**
@@ -10,6 +12,7 @@ public class BlurFilter extends PhotoFilter{
 	 */
 	private static final long serialVersionUID = -7142024283650567724L;
 
+	
 
 
 	/**
@@ -19,6 +22,8 @@ public class BlurFilter extends PhotoFilter{
      */
 	@Override
 	public BufferedImage apply(ImageMatrix imageMatrix, int value) {
+		long startTime = System.currentTimeMillis();
+
 	    // Check if the blurValue is within the valid range
 	    if (value < 0 || value > 100) {
 	        throw new IllegalArgumentException("value must be between 0 and 100");
@@ -70,6 +75,11 @@ public class BlurFilter extends PhotoFilter{
 	            blurredMatrix.setRGB(i, j, ImageMatrix.convertRGB(red, green, blue));
 	        }
 	    }
+	    
+
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(toString()+" applied. Execution:"+elapsedTime);
 
 	    return blurredMatrix.getBufferedImage();
 	}

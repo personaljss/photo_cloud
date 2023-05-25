@@ -3,6 +3,7 @@ package utils;
 import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
+import services.Logger;
 
 /**
  * The ContrastFilter class represents a photo filter that adjusts the contrast of an image.
@@ -25,7 +26,7 @@ public class ContrastFilter extends PhotoFilter {
     @Override
     public BufferedImage apply(ImageMatrix imageMatrix, int value) {
         double contrast = 1.0 + (double) value / 100.0; // Convert the value to a contrast factor
-
+		long startTime = System.currentTimeMillis();
         int width = imageMatrix.getWidth();
         int height = imageMatrix.getHeight();
 
@@ -49,7 +50,9 @@ public class ContrastFilter extends PhotoFilter {
                 filteredImage.setRGB(x, y, filteredRGB);
             }
         }
-
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(toString()+" applied. Execution:"+elapsedTime);
         return filteredImage.getBufferedImage();
     }
 

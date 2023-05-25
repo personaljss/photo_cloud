@@ -3,6 +3,7 @@ package utils;
 import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
+import services.Logger;
 
 public class BrightnessFilter extends PhotoFilter {
     /**
@@ -13,6 +14,7 @@ public class BrightnessFilter extends PhotoFilter {
 	@Override
     public BufferedImage apply(ImageMatrix image, int value) {
         // Check if the brightness value is within the valid range
+		long startTime = System.currentTimeMillis();
         if (value < -255 || value > 255) {
             throw new IllegalArgumentException("value must be between -255 and 255");
         }
@@ -41,6 +43,9 @@ public class BrightnessFilter extends PhotoFilter {
             }
         }
 
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(toString()+" applied. Execution:"+elapsedTime);
         // Return the modified image as a BufferedImage
         return image.getBufferedImage();
     }

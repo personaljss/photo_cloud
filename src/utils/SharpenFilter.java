@@ -3,6 +3,7 @@ package utils;
 import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
+import services.Logger;
 
 public class SharpenFilter extends PhotoFilter {
     /**
@@ -13,6 +14,7 @@ public class SharpenFilter extends PhotoFilter {
 
     @Override
     public BufferedImage apply(ImageMatrix image, int value) {
+		long startTime = System.currentTimeMillis();
         // Apply the blur filter to the original image
         BlurFilter blurFilter = new BlurFilter();
         BufferedImage blurredImage = blurFilter.apply(image, value);
@@ -54,6 +56,9 @@ public class SharpenFilter extends PhotoFilter {
                 sharpenedMatrix.setRGB(i, j, sharpenedPixel);
             }
         }
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(toString()+" applied. Execution:"+elapsedTime);
 
         // Return the sharpened image as a BufferedImage
         return sharpenedMatrix.getBufferedImage();

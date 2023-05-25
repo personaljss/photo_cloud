@@ -3,6 +3,7 @@ package utils;
 import java.awt.image.BufferedImage;
 
 import services.ImageMatrix;
+import services.Logger;
 
 public class GrayscaleFilter extends PhotoFilter {
 
@@ -15,6 +16,7 @@ public class GrayscaleFilter extends PhotoFilter {
 
 	@Override
     public BufferedImage apply(ImageMatrix imageMatrix, int value) {
+		long startTime = System.currentTimeMillis();
         // Check if the value is within the valid range
         if (value < 0 || value > 100) {
             throw new IllegalArgumentException("Value must be between 0 and 100");
@@ -43,6 +45,9 @@ public class GrayscaleFilter extends PhotoFilter {
                 grayscaleMatrix.setRGB(x, y, ImageMatrix.convertRGB(grayscale, grayscale, grayscale));
             }
         }
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - startTime;
+		Logger.getInstance().logInfo(toString()+" applied. Execution:"+elapsedTime);
 
         return grayscaleMatrix.getBufferedImage();
     }

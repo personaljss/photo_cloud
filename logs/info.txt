@@ -17,3 +17,48 @@
 [Thu May 25 09:43:21 TRT 2023][INFO] admin: Login successful.
 [Thu May 25 09:43:48 TRT 2023][INFO] admin applied Contrast Filter to the image: admin1
 [Thu May 25 09:45:41 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 10:10:58 TRT 2023][INFO] admin: Password is wrong.
+[Thu May 25 10:11:17 TRT 2023][INFO] admin: Password is wrong.
+[Thu May 25 10:11:44 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 10:11:44 TRT 2023][INFO] Blur Filter applied. Execution:17
+[Thu May 25 10:11:45 TRT 2023][INFO] Blur Filter applied. Execution:7
+[Thu May 25 10:11:46 TRT 2023][INFO] Blur Filter applied. Execution:11
+[Thu May 25 10:11:47 TRT 2023][INFO] Blur Filter applied. Execution:21
+[Thu May 25 10:11:47 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:11:52 TRT 2023][INFO] Blur Filter applied. Execution:6
+[Thu May 25 10:11:54 TRT 2023][INFO] Blur Filter applied. Execution:5
+[Thu May 25 10:11:56 TRT 2023][INFO] Blur Filter applied. Execution:19
+[Thu May 25 10:11:57 TRT 2023][INFO] Blur Filter applied. Execution:19
+[Thu May 25 10:12:00 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:12:04 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:12:05 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:12:05 TRT 2023][INFO] Blur Filter applied. Execution:5
+[Thu May 25 10:16:05 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:05 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:15 TRT 2023][INFO] admin: Login successful.
+[Thu May 25 10:16:16 TRT 2023][INFO] Blur Filter applied. Execution:16
+[Thu May 25 10:16:16 TRT 2023][INFO] Blur Filter applied. Execution:11
+[Thu May 25 10:16:17 TRT 2023][INFO] Blur Filter applied. Execution:20
+[Thu May 25 10:16:17 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:22 TRT 2023][INFO] Grayscale Filter  applied. Execution:10
+[Thu May 25 10:16:28 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:28 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:35 TRT 2023][INFO] Grayscale Filter  applied. Execution:2
+[Thu May 25 10:16:36 TRT 2023][INFO] admin4 image has been modified
+[Thu May 25 10:16:36 TRT 2023][INFO] admin applied Grayscale Filter  to the image: admin4
+[Thu May 25 10:16:40 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:40 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:40 TRT 2023][INFO] Blur Filter applied. Execution:5
+[Thu May 25 10:16:41 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:51 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:51 TRT 2023][INFO] Blur Filter applied. Execution:5
+[Thu May 25 10:16:51 TRT 2023][INFO] Blur Filter applied. Execution:5
+[Thu May 25 10:16:52 TRT 2023][INFO] Blur Filter applied. Execution:6
+[Thu May 25 10:16:53 TRT 2023][INFO] Blur Filter applied. Execution:4
+[Thu May 25 10:16:53 TRT 2023][INFO] Blur Filter applied. Execution:5
+[Thu May 25 10:16:59 TRT 2023][INFO] Grayscale Filter  applied. Execution:13
+[Thu May 25 10:16:59 TRT 2023][INFO] Blur Filter applied. Execution:6
+[Thu May 25 10:16:59 TRT 2023][INFO] Edge Detection Filter applied. Execution:112
+[Thu May 25 10:17:00 TRT 2023][INFO] admin2 image has been modified
+[Thu May 25 10:17:00 TRT 2023][INFO] admin applied Edge Detection Filter to the image: admin2
+[Thu May 25 10:17:02 TRT 2023][INFO] Blur Filter applied. Execution:5
